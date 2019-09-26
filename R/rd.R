@@ -104,7 +104,19 @@ needs_doc <- function(block) {
 
 # Tag processing functions ------------------------------------------------
 
-block_to_rd <- function(block, base_path, env, global_options = list()) {
+block_to_rd <- function(block, ...) {
+  UseMethod("block_to_rd")
+}
+
+#' @export
+
+block_to_rd.default <- function(block, ...) {
+  stop("Internal roxygen error, unknown block type")
+}
+
+#' @export
+
+block_to_rd.roxy_block <- function(block, base_path, env, global_options = list()) {
   # Must start by processing templates
   block <- process_templates(block, base_path, global_options)
 
