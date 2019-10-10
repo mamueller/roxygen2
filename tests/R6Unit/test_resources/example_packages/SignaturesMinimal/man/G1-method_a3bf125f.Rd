@@ -6,4 +6,4 @@
 \arguments{
 	\item{a1}{: of class numeric}
 }
-\description{}
+\description{no description in comments}

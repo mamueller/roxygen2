@@ -10,7 +10,7 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     setUp=function(){
       #source('../../cpDir.R')
       source('../../writeDescriptionFile.R')
-      source('../../cp_package_files.R')
+      #source('../../cp_package_files.R')
       source('../../assertCranResultOk.R')
       source('../../checkExamplePackage.R')
       requireNamespace("pkgload")
@@ -24,7 +24,7 @@ PkgScriptTests<-R6Class("PkgScriptTests",
 	  #}
     #,
     #--------------------------------
-	  test.abbriviatedSignatureMinimal=function(){
+	  test.SignatureMinimal=function(){
       checkExamplePkg("SignaturesMinimal")
 	  }
     #,

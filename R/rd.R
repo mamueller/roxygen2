@@ -111,6 +111,63 @@ block_to_rd.default <- function(block, ...) {
 
 #' @export
 
+block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
+  # Must start by processing templates
+  block <- process_templates(block, base_path)
+
+  if (!needs_doc(block)) {
+    return()
+  }
+
+  name <- block_get_tag(block, "name")$val %||% block$object$topic
+  if (is.null(name)) {
+    roxy_tag_warning(block$tags[[1]], "Missing name")
+    return()
+  }
+
+  rd <- RoxyTopic$new()
+  topic_add_name_aliases(rd, block, name)
+  
+  if (!block_has_tags(block,'@param')){
+      # this should be adapted to also work if not all
+      # params have been declared
+      wrapArgName=function(arg_name){sprintf("item{%s}",arg_name)}
+      print("automatically adding section arguments")
+      functionObject<-block$object$value
+      function_args<-names(formals(functionObject))
+      print(function_args)
+      tags=block$tags
+      for (arg in function_args){
+        tags<-append(
+            tags
+            ,list(roxy_tag(
+                tag='param'
+                ,raw=paste(arg,': see methods')
+                ,val=list("name"=arg,description="see methods")
+            ))
+        )
+      }
+      block$tags<-tags
+  }
+
+  for (tag in block$tags) {
+    rd$add(roxy_tag_rd(tag, env = env, base_path = base_path))
+  }
+
+  if (rd$has_section("description") && rd$has_section("reexport")) {
+    roxy_tag_warning(block$tags[[1]], "Can't use description when re-exporting")
+    return()
+  }
+  describe_rdname <- topic_add_describe_in(rd, block, env)
+  filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
+  rd$filename <- paste0(filename, ".Rd")
+
+  browser()
+  rd
+}
+
+#' @export
+
 block_to_rd.roxy_block <- function(block, base_path, env) {
   # Must start by processing templates
   block <- process_templates(block, base_path)

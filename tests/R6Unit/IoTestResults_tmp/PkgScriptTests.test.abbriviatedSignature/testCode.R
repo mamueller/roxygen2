@@ -1,8 +1,0 @@
-source("../../writeDescriptionFile.R")
-source("../../cp_package_files.R")
-source("../../assertCranResultOk.R")
-source("../../checkExamplePackage.R")
-requireNamespace("pkgload")
-requireNamespace("debugHelpers")
-pkgload::load_all("../../")
-checkExamplePkg("Signatures")

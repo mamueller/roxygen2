@@ -10,11 +10,11 @@ checkExamplePkg=function(targetPkgName){
   # if necessarry add a default DESCRIPTION file
   if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
     writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
-
-  # perform cran checks on the original documentation
-  l<-devtools::check(pkgDirOrg,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
-  assertCranResultOk(l,msg="devtools::check failed")
   }
+  
+  ## perform cran checks on the original documentation
+  #l<-devtools::check(pkgDirOrg,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
+  #assertCranResultOk(l,msg="devtools::check failed")
 
   # now duplicate the package directory
   R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
@@ -23,8 +23,8 @@ checkExamplePkg=function(targetPkgName){
 
   # create the documentation automatically
   roxygenize(pkgDirAutoDocs)
-  
-  # perform cran checks on the automatic documentation
-  #l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
-  #assertCranResultOk(l,msg="devtools::check failed")
+  #
+  ## perform cran checks on the automatic documentation
+  l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
+  assertCranResultOk(l,msg="devtools::check failed")
 }
