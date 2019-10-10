@@ -1,0 +1,9 @@
+Package: Signatures
+Title: EXAMPLES to TEST the POSSIBILITIES of NAMESPACES  
+Version:0.1
+Date:  2019-10-04 
+Author:  Markus Mueller <mamueller@bgc-jena.mpg.de>
+Maintainer: Markus Mueller <mamueller@bgc-jena.mpg.de>
+Description: This package contains functions whose automatic documentation is tested.
+License: GPL-3
+Imports: methods

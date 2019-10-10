@@ -1,0 +1,11 @@
+# Export a generic function
+# which according to https://cran.r-project.org/doc/manuals/R-exts.html#Namespaces-with-S4-classes-and-methods 
+# implicitely exports all the methods
+# 
+import(   #mark the special syntax up to now we would can not handle the one line version import(methods)
+methods
+)
+exportClasses(
+M1
+)
+

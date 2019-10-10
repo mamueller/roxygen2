@@ -97,7 +97,7 @@ roxygen_setup <- function(base_path) {
 
   man_path <- file.path(base_path, "man")
   dir.create(man_path, recursive = TRUE, showWarnings = FALSE)
-  update_roxygen_version(base_path)
+  #update_roxygen_version(base_path)
 
   is_first
 }

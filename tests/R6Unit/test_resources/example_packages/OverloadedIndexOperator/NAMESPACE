@@ -1,0 +1,6 @@
+import(
+"methods"
+)
+importFrom("stats","runif")
+# do not export any generic function nor method
+
