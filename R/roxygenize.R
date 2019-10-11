@@ -68,13 +68,31 @@ roxygenize <- function(package.dir = ".",
   # Now load code
   load_code <- find_load_strategy(load_code)
   env <- load_code(base_path)
+
   blocks <- lapply(blocks, block_set_env, env = env)
+  
+  objectsWithBlocks<-lapply(blocks,function(block){block$object$value})
 
   results <- lapply(roclets, roclet_process,
     blocks = blocks,
     env = env,
     base_path = base_path
   )
+  # find those objects that do not have a block but have to be documented.
+  l<-list()
+  genNames<-getGenerics(env)
+  for (genName in genNames){
+      gen<-getGeneric(genName,env)
+      l<-append(l,gen)
+      loms<-findMethods(gen,where=env)
+      for (md in loms){
+        l<-append(l,md)
+      }
+  }
+  in_need_of_docs<-setdiff(l,objectsWithBlocks)
+      
+
+  browser()
 
   out <- purrr::map2(
     roclets, results,

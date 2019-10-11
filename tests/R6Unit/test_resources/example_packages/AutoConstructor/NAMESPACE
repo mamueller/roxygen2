@@ -1,3 +1,0 @@
-import(methods)
-exportClasses(RealClass)
-export(RealClass) #the generator function automatically returned by setClass

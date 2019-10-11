@@ -20,7 +20,7 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     ,
     ##--------------------------------
     #test.SoilR=function(){
-    #  checkExamplePkg("SoilR")
+    #  checkExamplePkg("SoilR-exp")
 	  #}
     #,
     #--------------------------------

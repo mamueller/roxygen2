@@ -1,2 +1,0 @@
-import(methods)
-exportClasses(RealClass,VirtualParentClass,VirtualParentParentClass)

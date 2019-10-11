@@ -1,5 +1,3 @@
-#' build a G
-#'
 setGeneric(
     name="G1",
     def=function (a1,a2){
@@ -7,19 +5,18 @@ setGeneric(
     }
 )
 
-#' build a G
-#'
 setMethod(f="G1",
   signature=signature(
     a1="numeric"
   ),
-  definition=function(a1){
+  definition=function(a1,a2){
      return()
   }
 )
 
-#' build a G
+#' G1 
 #'
+#' @param a1 The only parameter described
 setMethod(f="G1",
   signature=signature(
     a1="numeric",

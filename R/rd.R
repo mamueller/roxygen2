@@ -111,6 +111,77 @@ block_to_rd.default <- function(block, ...) {
 
 #' @export
 
+block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
+  # Must start by processing templates
+  block <- process_templates(block, base_path)
+
+  if (!needs_doc(block)) {
+    return()
+  }
+
+  name <- block_get_tag(block, "name")$val %||% block$object$topic
+  if (is.null(name)) {
+    roxy_tag_warning(block$tags[[1]], "Missing name")
+    return()
+  }
+  # create empty tags for undocumented params
+
+  function_args<-names(formals(block$object$value))
+  sig <- block$object$value@defined
+  present_tags<-block_get_tags(block,'param')
+  documented_args<-unlist( lapply(present_tags,function(tag){tag$val$name}))
+  
+  extra_tags <- lapply(
+    setdiff(function_args,documented_args)
+    ,function(arg){
+      res=
+      roxy_tag(
+        tag='param'
+        ,raw=paste(arg,':',sep='')
+        ,val=list("name"=arg,description="")
+      )
+    }
+  )
+  block$tags <- append(
+    block$tags,
+    lapply(
+      append(present_tags,extra_tags),
+      function(tag){
+        v<-tag$val
+        if (v$name %in% names(sig)){
+          d <- paste("object of class:", "\\code{",sig[[v$name]],"}",'. ' ,v$description,sep='')
+          tag <- roxy_tag(
+            tag='param',
+            raw=paste(v$name,': ',d,sep=''),
+            val=list("name"=v$name,description=d)
+          )
+        }
+        return(tag)
+      }
+    )
+  )
+  rd <- RoxyTopic$new()
+  topic_add_name_aliases(rd, block, name)
+  for (tag in block$tags) {
+    rd$add(roxy_tag_rd(tag, env = env, base_path = base_path))
+  }
+
+  if (rd$has_section("description") && rd$has_section("reexport")) {
+    roxy_tag_warning(block$tags[[1]], "Can't use description when re-exporting")
+    return()
+  }
+  
+
+  describe_rdname <- topic_add_describe_in(rd, block, env)
+  filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
+  rd$filename <- paste0(filename, ".Rd")
+
+  rd
+}
+
+
+#' @export
+
 block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
   # Must start by processing templates
   block <- process_templates(block, base_path)
@@ -128,27 +199,26 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
   rd <- RoxyTopic$new()
   topic_add_name_aliases(rd, block, name)
   
-  if (!block_has_tags(block,'@param')){
-      # this should be adapted to also work if not all
-      # params have been declared
-      wrapArgName=function(arg_name){sprintf("item{%s}",arg_name)}
-      print("automatically adding section arguments")
-      functionObject<-block$object$value
-      function_args<-names(formals(functionObject))
-      print(function_args)
-      tags=block$tags
-      for (arg in function_args){
-        tags<-append(
-            tags
-            ,list(roxy_tag(
-                tag='param'
-                ,raw=paste(arg,': see methods')
-                ,val=list("name"=arg,description="see methods")
-            ))
-        )
-      }
-      block$tags<-tags
-  }
+  param_tags <- block_get_tags(block,'param')
+  documented_args<-unlist(
+    lapply(
+      block_get_tags(block,'param')
+      ,function(tag){tag$val$name}
+    )
+  )
+  function_args<-names(formals(block$object$value))
+  undocumented_args <- setdiff(function_args,documented_args)
+  extra_tags <- lapply(
+    undocumented_args
+    ,function(arg){
+      roxy_tag(
+        tag='param'
+        ,raw=paste(arg,': see method arguments')
+        ,val=list("name"=arg,description="see method arguments")
+      )
+    }
+  )
+  block$tags<-append(block$tags,extra_tags)
 
   for (tag in block$tags) {
     rd$add(roxy_tag_rd(tag, env = env, base_path = base_path))
@@ -161,8 +231,6 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
   describe_rdname <- topic_add_describe_in(rd, block, env)
   filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
   rd$filename <- paste0(filename, ".Rd")
-
-  browser()
   rd
 }
 
