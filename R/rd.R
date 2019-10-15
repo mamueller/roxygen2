@@ -44,9 +44,7 @@ roclet_process.roclet_rd <- function(x, blocks, env, base_path) {
   }
   topics_process_family(topics, env)
   topics_process_inherit(topics, env)
-  browser()
   topics$drop_invalid()
-  browser()
   topics_fix_params_order(topics)
   topics_add_default_description(topics)
 
@@ -186,7 +184,6 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   describe_rdname <- topic_add_describe_in(rd, block, env)
   filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
   rd$filename <- paste0(filename, ".Rd")
-  browser()
   rd
 }
 

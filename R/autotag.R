@@ -1,29 +1,79 @@
 autotag_roclet <- function() {
   roclet("autotag")
 }
-#' @export
-roclet_preprocess.roclet_autotag <- function(x, blocks, base_path) {
-  browser()
-  #lines <- blocks_to_ns(blocks, env, import_only = TRUE)
-  #NAMESPACE <- file.path(base_path, "NAMESPACE")
-
-  #if (length(lines) == 0 && !made_by_roxygen(NAMESPACE)) {
-  #  return(x)
-  #}
-
-  #results <- c(made_by("#"), lines)
-  #write_if_different(NAMESPACE, results, check = TRUE)
-
-  invisible(x)
-}
+#roclet_preprocess.roclet_autotag <- function(x, blocks, base_path) {
+#
+#  invisible(x)
+#}
 
 #' @export
 roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
-  blocks_to_ns(blocks, env)
+  # The list of blocks that this function receives as an argument is incomplete
+  # since some of the objects have not been tagged yet but are going to be
+  # tagged automatically with @auto by this very roclet.
+  # we therefore parse the whole package using Rs own parse function
+  env <- env_package(base_path)
+  files <- package_files(base_path)
+  a_o<- lapply(
+    files,
+    function(file){
+      sf<-srcfile(file)
+      exprs<-parse(file,keep.source=TRUE,srcfile=sf)
+      objects_from_file<-lapply(
+        1:(length(exprs)),
+        function(i){
+          call<-exprs[[i]]
+          o<-object_from_call( call=call, env=env, file=file)
+          attr(o,"srcref")<-attr(exprs,'srcref')[[i]]
+          o
+        }
+      )
+    }
+   )
+
+  browser()
+  a_o_flat=list()
+  for(o in a_o) {a_o_flat<-append(a_o_flat,o)}
+
+  objectsWithBlocks<-lapply(blocks,function(block){block$object}) 
+  # find the undocumented objects
+  results<-setdiff(a_o_flat,objectsWithBlocks)
+  browser()
+  results
 }
 
 #' @export
 roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
+  # first sort all the undocumented objects by the file
+  # they are defined in
+  files=unique(
+    lapply(
+      results,
+      function(o){
+        utils::getSrcFilename(attr(o,"srcref"))
+      }
+    )
+  )
+  for (file in files){
+    # find the untagged objects in that file
+    os<-results[
+      as.logical(
+        lapply(
+          results,
+          function(o){
+            utils::getSrcFilename(attr(o,"srcref"))==file
+          }
+        )
+      )
+    ]
+    # now sort them in the order in which they appear in the
+    # file
+  }
+
+  locations<-lapply(
+    results,
+    function(o){utils::getSrcLocation(attr(o,"srcref"))}
+  )
   #NAMESPACE <- file.path(base_path, "NAMESPACE")
   #results <- c(made_by("#"), results)
 

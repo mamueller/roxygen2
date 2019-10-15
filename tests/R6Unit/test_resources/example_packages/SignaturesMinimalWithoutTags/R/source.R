@@ -7,13 +7,15 @@ setGeneric(
 
 setMethod(f="G1",
   signature=signature(
+    # some comments not intended for the docs
     a1="numeric"
   ),
   definition=function(a1,a2){
      return()
   }
 )
-
+#' one (partly) documented method
+#'
 setMethod(f="G1",
   signature=signature(
     a1="numeric",
