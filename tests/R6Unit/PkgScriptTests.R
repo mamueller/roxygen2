@@ -19,69 +19,14 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     }
     ,
     ##--------------------------------
-    #test.SoilR=function(){
-    #  checkExamplePkg("SoilR-exp")
+	  #test.SignatureMinimal=function(){
+    #  checkExamplePkg("SignaturesMinimal")
 	  #}
     #,
     #--------------------------------
-	  test.SignatureMinimal=function(){
-      checkExamplePkg("SignaturesMinimal")
+	  test.SignatureMinimalWithoutTags=function(){
+      checkExamplePkg("SignaturesMinimalWithoutTags")
 	  }
-    #,
-    ##--------------------------------
-    #test.OverloadedIndexOperator=function(){
-    #  checkExamplePkg("OverloadedIndexOperator")
-	  #}
-    #,
-    ##--------------------------------
-    #test.noMethodRdFilesForHiddenMethods=function(){
-    #  checkExamplePkg("HiddenMethod")
-	  #}
-    #,
-    ##--------------------------------
-    #test.GenericWithDotDotDotArgumets=function(){
-    #  checkExamplePkg("GenericWithDotDotDotArgumets")
-	  #}
-    #,
-    ##--------------------------------
-    #test.OverloadedIndexedAssingment=function(){
-    #  checkExamplePkg("OverloadedIndexedAssingment")
-	  #}
-    #,
-    ##--------------------------------
-    #test.ClassWithMethods=function(){
-    #  checkExamplePkg("ClassWithMethods")
-		#}
-    #,
-    ##--------------------------------
-    #test.ClassWithExamples=function(){
-    #  checkExamplePkg("ClassWithExamples")
-		#}
-    #,
-    ##--------------------------------
-    #test.ClassWithMethodsAndExampleFiles=function(){
-    #  checkExamplePkg("ClassWithMethodsAndExampleFiles")
-		#}
-    #,
-    ##--------------------------------
-    #test.AutoConstructor=function(){
-    #  checkExamplePkg("AutoConstructor")
-		#}
-    #,
-    ##--------------------------------
-    #test.VirtualClass=function(){
-    #  checkExamplePkg("VirtualClass")
-		#}
-    #,
-    ##--------------------------------
-    #test.MethodSrcRef=function(SKIP){
-    #  checkExamplePkg("MethodSrcRef")
-		#}
-    #,
-    ##--------------------------------
-    #test.PrivateAndPublic=function(){
-    #  checkExamplePkg("PrivateAndPublic")
-		#}
 	)
 )
 

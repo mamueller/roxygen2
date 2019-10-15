@@ -1,9 +1,9 @@
-namespace_roclet <- function() {
-  roclet("namespace")
+autotag_roclet <- function() {
+  roclet("autotag")
 }
 #' @export
 roclet_preprocess.roclet_autotag <- function(x, blocks, base_path) {
-
+  browser()
   #lines <- blocks_to_ns(blocks, env, import_only = TRUE)
   #NAMESPACE <- file.path(base_path, "NAMESPACE")
 

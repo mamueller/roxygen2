@@ -22,7 +22,7 @@ checkExamplePkg=function(targetPkgName){
   unlink(file.path(pkgDirAutoDocs,"man"),recursive=TRUE)
 
   # create the documentation automatically
-  roxygenize(pkgDirAutoDocs)
+  roxygenize(pkgDirAutoDocs,c("collate", "namespace", "autotag_roclet","rd"))
   #
   ## perform cran checks on the automatic documentation
   l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
