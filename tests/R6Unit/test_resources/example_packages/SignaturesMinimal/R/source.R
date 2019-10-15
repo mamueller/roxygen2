@@ -1,3 +1,5 @@
+
+#' @auto
 setGeneric(
     name="G1",
     def=function (a1,a2){
@@ -5,6 +7,7 @@ setGeneric(
     }
 )
 
+#' @auto
 setMethod(f="G1",
   signature=signature(
     a1="numeric"

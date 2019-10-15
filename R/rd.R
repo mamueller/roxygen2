@@ -44,7 +44,9 @@ roclet_process.roclet_rd <- function(x, blocks, env, base_path) {
   }
   topics_process_family(topics, env)
   topics_process_inherit(topics, env)
+  browser()
   topics$drop_invalid()
+  browser()
   topics_fix_params_order(topics)
   topics_add_default_description(topics)
 
@@ -92,7 +94,7 @@ needs_doc <- function(block) {
   }
 
   block_has_tags(block, c(
-    "description", "param", "return", "title", "example",
+    "description", "param", "return", "title", "example","auto",
     "examples", "name", "rdname", "details", "inherit", "describeIn")
   )
 }
@@ -118,11 +120,20 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   if (!needs_doc(block)) {
     return()
   }
-
   name <- block_get_tag(block, "name")$val %||% block$object$topic
   if (is.null(name)) {
     roxy_tag_warning(block$tags[[1]], "Missing name")
     return()
+  }
+  
+  if (block_has_tags(block, "auto")){
+    str<-block$object$topic
+    tt<- roxy_tag(
+        tag='title',
+        raw=str,
+        val=str
+      )
+    block$tags<-append(block$tags,list(tt))
   }
   # create empty tags for undocumented params
 
@@ -175,7 +186,7 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   describe_rdname <- topic_add_describe_in(rd, block, env)
   filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
   rd$filename <- paste0(filename, ".Rd")
-
+  browser()
   rd
 }
 
@@ -194,6 +205,15 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
   if (is.null(name)) {
     roxy_tag_warning(block$tags[[1]], "Missing name")
     return()
+  }
+  if (block_has_tags(block, "auto")){
+    str<-block$object$topic
+    tt<- roxy_tag(
+        tag='title',
+        raw=str,
+        val=str
+      )
+    block$tags<-append(block$tags,list(tt))
   }
 
   rd <- RoxyTopic$new()

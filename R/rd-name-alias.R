@@ -16,7 +16,6 @@ format.rd_section_name <- function(x, ...) {
 
 topic_add_name_aliases <- function(topic, block, name) {
   tags <- block_get_tags(block, "aliases")
-
   if (length(tags) == 0) {
     aliases <- character()
   } else {

@@ -108,6 +108,7 @@ roxy_tag_ns.roxy_tag_evalNamespace <- function(x, block, env, import_only = FALS
 roxy_tag_parse.roxy_tag_export <- function(x) {
   tag_words_line(x)
 }
+
 #' @export
 roxy_tag_ns.roxy_tag_export <- function(x, block, env, import_only = FALSE) {
   if (import_only) {
