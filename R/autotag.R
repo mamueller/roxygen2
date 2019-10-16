@@ -77,7 +77,7 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
     ))
     
     ord_locations<-locations_org[order(locations_org)]
-    boundaries<-c(ord_locations,length(lines))
+    boundaries<-c(ord_locations,length(lines)+1)
     chunks<-lapply(
       1:length(ord_locations), # It is possible that some non roxygen related comments exist before the first call
       function(i){
