@@ -20,7 +20,6 @@ roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
       print(file)
       sf<-srcfile(file)
       exprs<-parse(file,keep.source=TRUE,srcfile=sf)
-      browser()
       print(exprs)
       objects_from_file<-lapply(
         1:length(exprs),
@@ -76,23 +75,33 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
       results,
       function(o){utils::getSrcLocation(attr(o,"srcref"))}
     ))
-    browser()
     
     ord_locations<-locations_org[order(locations_org)]
-    boundaries<-c(0,ord_locations,length(lines))
-    extendedLines<-unlist(lapply(
-      2:length(ord_locations), # It is possible that some non roxygen related comments exist before the first call
+    boundaries<-c(ord_locations,length(lines))
+    chunks<-lapply(
+      1:length(ord_locations), # It is possible that some non roxygen related comments exist before the first call
       function(i){
         start_line<-boundaries[[i]]
-        end_line<-boundaries[[i+1]]
+        end_line<-boundaries[[i+1]]-1
         chunk<-lines[start_line:end_line]
-        extended_chunk<-c("#' @auto",chunk)
-        extended_chunk
       }
-    ))
-    write_lines(extendedLines,p2)
-
-
+    )
+    browser()
+    extendedChunks<-lapply(
+      chunks,
+      function(chunk){
+        extended_chunk<-c("#' @auto",chunk)
+      }
+    )
+    browser()
+    first<-ord_locations[[1]]
+    if(first>1){
+      extendedLines<- c(lines[1:first],unlist(extendedChunks))
+    }else{
+      extendedLines<- unlist(extendedChunks)
+    }
+    browser()
+    write_lines(extendedLines,p)
   }
 
   #NAMESPACE <- file.path(base_path, "NAMESPACE")
