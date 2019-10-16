@@ -17,11 +17,15 @@ roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
   a_o<- lapply(
     files,
     function(file){
+      print(file)
       sf<-srcfile(file)
       exprs<-parse(file,keep.source=TRUE,srcfile=sf)
+      browser()
+      print(exprs)
       objects_from_file<-lapply(
-        1:(length(exprs)),
+        1:length(exprs),
         function(i){
+          print(i)
           call<-exprs[[i]]
           o<-object_from_call( call=call, env=env, file=file)
           attr(o,"srcref")<-attr(exprs,'srcref')[[i]]
@@ -31,14 +35,12 @@ roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
     }
    )
 
-  browser()
   a_o_flat=list()
   for(o in a_o) {a_o_flat<-append(a_o_flat,o)}
 
   objectsWithBlocks<-lapply(blocks,function(block){block$object}) 
   # find the undocumented objects
   results<-setdiff(a_o_flat,objectsWithBlocks)
-  browser()
   results
 }
 
@@ -55,6 +57,9 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
     )
   )
   for (file in files){
+    p<-file.path(base_path,"R",file)
+    p2<-file.path(base_path,"R",paste0(file,".new"))
+    lines<-read_lines(p)
     # find the untagged objects in that file
     os<-results[
       as.logical(
@@ -66,14 +71,30 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
         )
       )
     ]
-    # now sort them in the order in which they appear in the
-    # file
+    # now sort the undocumented objects in the order in which they appear in the file
+    locations_org<-unlist(lapply(
+      results,
+      function(o){utils::getSrcLocation(attr(o,"srcref"))}
+    ))
+    browser()
+    
+    ord_locations<-locations_org[order(locations_org)]
+    boundaries<-c(0,ord_locations,length(lines))
+    extendedLines<-unlist(lapply(
+      2:length(ord_locations), # It is possible that some non roxygen related comments exist before the first call
+      function(i){
+        start_line<-boundaries[[i]]
+        end_line<-boundaries[[i+1]]
+        chunk<-lines[start_line:end_line]
+        extended_chunk<-c("#' @auto",chunk)
+        extended_chunk
+      }
+    ))
+    write_lines(extendedLines,p2)
+
+
   }
 
-  locations<-lapply(
-    results,
-    function(o){utils::getSrcLocation(attr(o,"srcref"))}
-  )
   #NAMESPACE <- file.path(base_path, "NAMESPACE")
   #results <- c(made_by("#"), results)
 
