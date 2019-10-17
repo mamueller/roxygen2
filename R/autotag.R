@@ -8,11 +8,12 @@ autotag_roclet <- function() {
 
 #' @export
 roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
+  browser()
   # The list of blocks that this function receives as an argument is incomplete
   # since some of the objects have not been tagged yet but are going to be
-  # tagged automatically with @auto by this very roclet.
-  # we therefore parse the whole package using Rs own parse function
-  env <- env_package(base_path)
+  # tagged automatically with "#' @auto" by this very roclet.
+  # To find them we have to use R's own parse function. 
+  #env <- env_package(base_path)
   files <- package_files(base_path)
   a_o<- lapply(
     files,
@@ -40,6 +41,20 @@ roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
   objectsWithBlocks<-lapply(blocks,function(block){block$object}) 
   # find the undocumented objects
   results<-setdiff(a_o_flat,objectsWithBlocks)
+
+  # only tag objects for which " #' @auto " can produce a cran-proof documentation 
+  # The list of supported classes is intended to grow but we are cautious for now... 
+  results<-purrr::keep(
+    results,
+    .p=function(obj){
+      cls<-c('s4method','s4generic')
+      any(vapply(
+        cls,
+        function(cl){inherits(obj,cl)},
+        FUN.VALUE=logical(1)
+      ))
+    }
+  )
   results
 }
 
@@ -86,21 +101,18 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
         chunk<-lines[start_line:end_line]
       }
     )
-    browser()
     extendedChunks<-lapply(
       chunks,
       function(chunk){
         extended_chunk<-c("#' @auto",chunk)
       }
     )
-    browser()
     first<-ord_locations[[1]]
     if(first>1){
       extendedLines<- c(lines[1:first],unlist(extendedChunks))
     }else{
       extendedLines<- unlist(extendedChunks)
     }
-    browser()
     write_lines(extendedLines,p)
   }
 

@@ -48,11 +48,12 @@ roxygenize <- function(package.dir = ".",
     roclets <- setdiff(roclets, "collate")
   }
 
+
+  
   if (length(roclets) == 0)
     return(invisible())
 
   roclets <- lapply(roclets, roclet_find)
-
   # Tokenise each file
   blocks <- parse_package(base_path, env = NULL)
 
@@ -70,91 +71,28 @@ roxygenize <- function(package.dir = ".",
   env <- load_code(base_path)
 
   blocks <- lapply(blocks, block_set_env, env = env)
-  #objectsWithBlocks<-lapply(blocks,function(block){block$object$value})
-  ## find those objects that do not have a block but have to be documented.
-  ## and create Rd files automatically. 
-  ## This is much simpler than creating blocks first since 
-  ## for a missing documentation we do not have to take care
-  ## of the (nonexisting) tags 
-  #rds<-list()
-  #genNames<-getGenerics(env)
-  #for (genName in genNames){
-  #    gen<-methods::getGeneric(genName,env)
-  #    if (!(c(gen) %in% as.vector(objectsWithBlocks))){
-  #      # create the doc object as in parser_setGeneric
-  #      obj<-object(gen,NULL,"s4generic")
-  #      defaults <- object_defaults(obj)
-  #      default_tags <- map_chr(defaults, "tag")
-  #      function_args<-names(formals(obj$value))
-  #      extra_tags <- lapply(
-  #        function_args
-  #        ,function(arg){
-  #          roxy_tag(
-  #            tag='param'
-  #            ,raw=paste(arg,': see method arguments')
-  #            ,val=list("name"=arg,description="see method arguments")
-  #          )
-  #        }
-  #      )
-  #      topic<-RoxyTopic$new() 
-  #      for (tag in append(default_tags,extra_tags)) {
-  #        topic$add(roxy_tag_rd(tag, env = env, base_path = base_path))
-  #      }
-  #      topic$add(rd_section("name", genName))
-  #      topic$add(rd_section("alias", genName))
-  #      rds<-append(rds,topic)
-  #    }
-  #    loms<-findMethods(gen,where=env)
-  #    mrds<-lapply(
-  #      setdiff(loms,objectsWithBlocks),
-  #      function(md){
-  #          # create the doc object as in parser_setGeneric
-  #          obj<-object(md,NULL,"s4method")
-  #          defaults <- object_defaults(obj)
-  #          #default_tags <- map_chr(defaults, "tag")
-  #          default_tags <-defaults
-  #          function_args<-names(formals(obj$value))
-  #          sig <- obj$value@defined
-  #          extra_tags <- lapply(
-  #            function_args
-  #            ,function(arg){
-  #              roxy_tag(
-  #                tag='param',
-  #                raw=paste(arg,':',sep=''),
-  #                val=list("name"=arg,description="")
-  #              )
-  #            }
-  #          )
-  #          # extend description for those args that have entries in the signature
-  #          # (which does not have to include all formals)
-  #          extra_tags<-lapply(
-  #            extra_tags,
-  #            function(tag){
-  #              v<-tag$val
-  #              if (v$name %in% names(sig)){
-  #                d <- paste("object of class:", "\\code{",sig[[v$name]],"}",'. ' ,v$description,sep='')
-  #                tag <- roxy_tag(
-  #                  tag='param',
-  #                  raw=paste(v$name,': ',d,sep=''),
-  #                  val=list("name"=v$name,description=d)
-  #                )
-  #              }
-  #              return(tag)
-  #            }
-  #          )
-  #          topic<-RoxyTopic$new() 
-  #          tags<-append(default_tags,extra_tags)
-  #          for (tag in tags) {
-  #            topic$add(roxy_tag_rd(tag, env = env, base_path = base_path))
-  #          }
-  #          name_str <- obj$topic
-  #          topic$add(rd_section("name",name_str))
-  #          topic$add(rd_section("alias",name_str))
-  #          topic$filename <-paste0(nice_name(name_str),".Rd")
-  #      }
-  #    )
-  #    rds<-append(rds,mrds)
-  #  }
+
+  # Special case autotag: 
+  # The autotag_roclet changes the source code by
+  # adding" #' @auto " before yet undocumented calls 
+  # in the source code. It thereby increases the number of blocks 
+  # that will be discovered by parsing and consequently has to run
+  # before the rd_roclet that will produce some minimal documentation
+  # for those objects.
+  x<-roclet_find("autotag_roclet")
+  if (list(x) %in% roclets) {
+    roclets <- roclets[ # setdiff does not work on list of roclets so we implement it
+      as.logical( lapply(
+        roclets,
+        function(r) !all(class(x)==class(r))
+      ))
+    ] 
+    untagged_objects<-roclet_process(x,blocks,env,base_path)
+    roclet_output(x, untagged_objects, base_path)
+    # parse again
+    blocks <- parse_package(base_path, env = NULL)
+    blocks <- lapply(blocks, block_set_env, env = env)
+  }
 
   results <- lapply(roclets, roclet_process,
     blocks = blocks,
