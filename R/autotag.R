@@ -1,37 +1,45 @@
 autotag_roclet <- function() {
   roclet("autotag")
 }
-#roclet_preprocess.roclet_autotag <- function(x, blocks, base_path) {
-#
-#  invisible(x)
-#}
 
 #' @export
 roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
-  browser()
   # The list of blocks that this function receives as an argument is incomplete
   # since some of the objects have not been tagged yet but are going to be
   # tagged automatically with "#' @auto" by this very roclet.
   # To find them we have to use R's own parse function. 
   #env <- env_package(base_path)
   files <- package_files(base_path)
+  
   a_o<- lapply(
     files,
     function(file){
-      print(file)
       sf<-srcfile(file)
       exprs<-parse(file,keep.source=TRUE,srcfile=sf)
-      print(exprs)
-      objects_from_file<-lapply(
-        1:length(exprs),
-        function(i){
-          print(i)
-          call<-exprs[[i]]
-          o<-object_from_call( call=call, env=env, file=file)
-          attr(o,"srcref")<-attr(exprs,'srcref')[[i]]
-          o
-        }
-      )
+      if(length(exprs)==0){
+        return(list())
+      }else{
+        objects_from_file<-purrr::keep(
+          lapply(
+            1:length(exprs),
+            function(i){
+              call<-exprs[[i]]
+              # create a pseudo block to be able to call object_from_call
+              b<-roxy_block(tags=list(),file=file,line=5000L,call=call,object=NULL)
+              
+              o<-tryCatch(
+                object_from_call( call=call, env=env,block=b, file=file),
+                error=function(e){
+                  NULL
+                }
+              )
+              if (!is.null(o)){attr(o,"srcref")<-attr(exprs,'srcref')[[i]]}
+              o
+            }
+          ),
+          .p=function(el){!is.null(el)}
+        )
+      }
     }
    )
 
@@ -87,7 +95,7 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
     ]
     # now sort the undocumented objects in the order in which they appear in the file
     locations_org<-unlist(lapply(
-      results,
+      os,
       function(o){utils::getSrcLocation(attr(o,"srcref"))}
     ))
     
@@ -104,12 +112,12 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
     extendedChunks<-lapply(
       chunks,
       function(chunk){
-        extended_chunk<-c("#' @auto",chunk)
+        extended_chunk<-c("","#' @auto",chunk)
       }
     )
     first<-ord_locations[[1]]
     if(first>1){
-      extendedLines<- c(lines[1:first],unlist(extendedChunks))
+      extendedLines<- c(lines[1:first-1],unlist(extendedChunks))
     }else{
       extendedLines<- unlist(extendedChunks)
     }
@@ -124,12 +132,4 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
   #write_if_different(NAMESPACE, results, check = TRUE)
 
   #NAMESPACE
-}
-
-#' @export
-roclet_clean.roclet_autotag <- function(x, base_path) {
-  #NAMESPACE <- file.path(base_path, "NAMESPACE")
-  #if (made_by_roxygen(NAMESPACE)) {
-  #  unlink(NAMESPACE)
-  #}
 }

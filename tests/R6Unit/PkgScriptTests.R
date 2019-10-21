@@ -18,11 +18,11 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       pkgload::load_all('../../')
     }
     ,
-    ##--------------------------------
-	  #test.SignatureMinimal=function(){
-    #  checkExamplePkg("SignaturesMinimal")
-	  #}
-    #,
+    #--------------------------------
+	  test.SignatureMinimal=function(){
+      checkExamplePkg("SignaturesMinimal")
+	  }
+    ,
     #--------------------------------
 	  test.SignatureMinimalWithoutTags=function(){
       checkExamplePkg("SignaturesMinimalWithoutTags")
