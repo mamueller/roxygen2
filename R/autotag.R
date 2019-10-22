@@ -112,7 +112,7 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
     extendedChunks<-lapply(
       chunks,
       function(chunk){
-        extended_chunk<-c("","#' @auto",chunk)
+        extended_chunk<-c("#' @auto",chunk)
       }
     )
     first<-ord_locations[[1]]

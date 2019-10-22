@@ -127,6 +127,8 @@ roxygen_setup <- function(base_path) {
 }
 
 roxy_warning <- function(..., file = NA, line = NA) {
+  print('################')
+  print(as.list(...))
   message <- paste0(
     if (!is.na(file)) paste0("[", file, ":", line, "] "),
     ...,
