@@ -80,7 +80,7 @@ roxygenize <- function(package.dir = ".",
   # before the rd_roclet that will produce some minimal documentation
   # for those objects.
   x<-roclet_find("autotag_roclet")
-  if (list(x) %in% roclets) {
+  if (class(x)[[1]] %in% purrr::map(roclets,function(r){class(r)[[1]]})){
     roclets <- roclets[ # setdiff does not work on list of roclets so we implement it
       as.logical( lapply(
         roclets,
@@ -88,6 +88,30 @@ roxygenize <- function(package.dir = ".",
       ))
     ] 
     untagged_objects<-roclet_process(x,blocks,env,base_path)
+    roclet_output(x, untagged_objects, base_path)
+    # parse again
+    blocks <- parse_package(base_path, env = NULL)
+    blocks <- lapply(blocks, block_set_env, env = env)
+  }
+  
+  # Special case auto_comment: 
+  # The autoroxcom_roclet changes the source code by inserting
+  # roxygen comments before yet undocumented calls 
+  # in the source code. 
+  # It thereby increases the number of blocks 
+  # that will be discovered by parsing and consequently has to run
+  # before the rd_roclet that will produce some minimal documentation
+  # for those objects.
+  x<-roclet_find("auto_comment_roclet")
+  if (class(x)[[1]] %in% purrr::map(roclets,function(r){class(r)[[1]]})){
+    roclets <- roclets[ # setdiff does not work on list of roclets so we implement it
+      as.logical( lapply(
+        roclets,
+        function(r) !all(class(x)==class(r))
+      ))
+    ] 
+    untagged_objects<-roclet_process(x,blocks,env,base_path)
+    browser()
     roclet_output(x, untagged_objects, base_path)
     # parse again
     blocks <- parse_package(base_path, env = NULL)

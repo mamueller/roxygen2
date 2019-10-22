@@ -164,6 +164,13 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
             raw=paste(v$name,': ',d,sep=''),
             val=list("name"=v$name,description=d)
           )
+        }else{
+          d<-'found automatically by inspection, not documented yet'
+          tag <- roxy_tag(
+            tag='param',
+            raw=paste(v$name,': ',d,sep=''),
+            val=list("name"=v$name,description=d)
+          )
         }
         return(tag)
       }
