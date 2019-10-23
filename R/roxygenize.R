@@ -73,21 +73,26 @@ roxygenize <- function(package.dir = ".",
   blocks <- lapply(blocks, block_set_env, env = env)
 
   # Special case autotag: 
-  # The autotag_roclet changes the source code by
+  # The _roclet changes the source code by
   # adding" #' @auto " before yet undocumented calls 
   # in the source code. It thereby increases the number of blocks 
   # that will be discovered by parsing and consequently has to run
   # before the rd_roclet that will produce some minimal documentation
   # for those objects.
   x<-roclet_find("autotag_roclet")
-  if (class(x)[[1]] %in% purrr::map(roclets,function(r){class(r)[[1]]})){
-    roclets <- roclets[ # setdiff does not work on list of roclets so we implement it
-      as.logical( lapply(
+  if (
+    any(
+      purrr::map(
         roclets,
-        function(r) !all(class(x)==class(r))
-      ))
-    ] 
-    untagged_objects<-roclet_process(x,blocks,env,base_path)
+        function(r){all(class(x)==class(r))}
+      )
+    )
+  ){
+    # setdiff does not work on list of roclet objects so we implement it
+    roclets <- purrr:::keep(
+      roclets,
+      function(r){!all(class(x)==class(r))}
+    )
     roclet_output(x, untagged_objects, base_path)
     # parse again
     blocks <- parse_package(base_path, env = NULL)
@@ -95,21 +100,27 @@ roxygenize <- function(package.dir = ".",
   }
   
   # Special case auto_comment: 
-  # The autoroxcom_roclet changes the source code by inserting
+  # The roclet changes the source code by inserting
   # roxygen comments before yet undocumented calls 
   # in the source code. 
   # It thereby increases the number of blocks 
   # that will be discovered by parsing and consequently has to run
-  # before the rd_roclet that will produce some minimal documentation
+  # before the rd_roclet that will produce documentation
   # for those objects.
   x<-roclet_find("auto_comment_roclet")
-  if (class(x)[[1]] %in% purrr::map(roclets,function(r){class(r)[[1]]})){
-    roclets <- roclets[ # setdiff does not work on list of roclets so we implement it
-      as.logical( lapply(
+  if (
+    any(
+      purrr::map(
         roclets,
-        function(r) !all(class(x)==class(r))
-      ))
-    ] 
+        function(r){all(class(x)==class(r))}
+      )
+    )
+  ){
+    # setdiff does not work on list of roclet objects so we implement it
+    roclets <- purrr:::keep(
+      roclets,
+      function(r){!all(class(x)==class(r))}
+    )
     untagged_objects<-roclet_process(x,blocks,env,base_path)
     browser()
     roclet_output(x, untagged_objects, base_path)

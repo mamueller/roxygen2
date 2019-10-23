@@ -1,6 +1,49 @@
 auto_comment_roclet <- function() {
   roclet("auto_comment")
 }
+# copied from the rd2roxygen package
+## wrap strings with comment prefix
+comment_line = function(x, exdent = 0) {
+  if (missing(x)) return(comment_prefix())
+
+  strwrap(x, width = 80, exdent = exdent, prefix = comment_prefix())
+}
+
+## add comments
+## copied from the rd2roxygen package
+comment_tag = function(tag, value) {
+  value = value[value != '']
+  if (length(value) == 0) return()
+
+  comment_line(paste(tag, value), exdent = 0)
+}
+
+## access the comment prefix
+## copied from the rd2roxygen package
+comment_prefix = function() {
+  getOption("roxygen.comment", "#' ")
+}
+
+object_to_block_lines <- function(x) UseMethod("object_to_block_lines")
+
+object_to_block_lines.s4generic<-function(obj){
+  res<-"
+#' Automatically created by inspection 
+#'
+#' @param a1 
+#' @auto_overwrite
+  "
+  res
+}
+object_to_block_lines.s4method<-function(obj){
+  res<-"
+#' Automatically created by inspection 
+#'
+#' @param a1 
+#' @auto_overwrite
+  "
+  res
+}
 
 #' @export
 roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
@@ -89,13 +132,6 @@ roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
       }
     )
   )
-  object_to_block_lines<-function(obj){
-    res<-"
-    #' @auto_overwrite
-    #' @param x
-    "
-    res
-  }
 
   for (file in files){
     p<-file.path(base_path,"R",file)
@@ -136,12 +172,6 @@ roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
         extended_chunk
       }
     )
-    #extendedChunks<-lapply(
-    #  chunks,
-    #  function(chunk){
-    #    extended_chunk<-c("#' @auto",chunk)
-    #  }
-    #)
     # It is possible that some non roxygen related comments exist before the
     # first object creating call
     first<-ord_locations[[1]]
