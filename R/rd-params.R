@@ -9,16 +9,6 @@ roxy_tag_rd.roxy_tag_param <- function(x, base_path, env) {
   rd_section(x$tag, value)
 }
 
-#' @export
-roxy_tag_parse.roxy_tag_auto <- function(x) {
-  tag_words_line(x)
-}
-
-#' @export
-roxy_tag_rd.roxy_tag_auto<- function(x, base_path, env) {
-  value <- NULL
-  rd_section(x$tag, value)
-}
 
 #' @export
 merge.rd_section_param <- function(x, y, ...) {

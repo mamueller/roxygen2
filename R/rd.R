@@ -92,7 +92,7 @@ needs_doc <- function(block) {
   }
 
   block_has_tags(block, c(
-    "description", "param", "return", "title", "example","auto",
+    "description", "param", "return", "title", "example","auto","s4methods",
     "examples", "name", "rdname", "details", "inherit", "describeIn")
   )
 }
@@ -114,7 +114,6 @@ block_to_rd.default <- function(block, ...) {
 block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   # Must start by processing templates
   block <- process_templates(block, base_path)
-
   if (!needs_doc(block)) {
     return()
   }
@@ -194,11 +193,36 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   rd
 }
 
+methodDocName=function (genName,sig){
+  sigString<-paste0(sig[names(sig)],collapse=",")
+  N=sprintf("%s,%s-method",genName,sigString)
+  N
+}
+
+add_method_tags=function (block){
+    meths<-methods::findMethods(block$object$value)
+    aliases<-lapply(
+      meths,
+      function(m){
+        genName<-attr(m,'generic')[[1]]
+        methodDocName(genName,sig=m@defined)
+      }
+    )
+    tt<- roxy_tag(
+        tag='s4methods',
+        raw="",
+        val= aliases
+        #val= c("method 17","method 2") 
+      )
+    block$tags<-append(block$tags,list(tt))
+    block
+}
 
 #' @export
 
 block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
   # Must start by processing templates
+  browser()
   block <- process_templates(block, base_path)
 
   if (!needs_doc(block)) {
@@ -218,6 +242,10 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
         val=str
       )
     block$tags<-append(block$tags,list(tt))
+    block<-add_method_tags(block)
+  }  
+  if (block_has_tags(block, "s4methods")){
+    block<-add_method_tags(block)
   }
 
   rd <- RoxyTopic$new()
@@ -243,7 +271,6 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
     }
   )
   block$tags<-append(block$tags,extra_tags)
-
   for (tag in block$tags) {
     rd$add(roxy_tag_rd(tag, env = env, base_path = base_path))
   }

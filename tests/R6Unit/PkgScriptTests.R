@@ -15,18 +15,18 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       source('../../checkExamplePackage.R')
       requireNamespace("pkgload")
       requireNamespace("debugHelpers")
-      pkgload::load_all('../../')
+      pkgload::load_all('../../../../')
     }
-   # ,
-   # #--------------------------------
-	 # test.SignatureMinimal=function(){
-   #   checkExamplePkg("SignaturesMinimal")
-	 # }
-   # ,
-   # #--------------------------------
-	 # test.SignatureMinimalWithoutTags=function(){
-   #   checkExamplePkg("SignaturesMinimalWithoutTags")
-	 # }
+    ,
+    ##--------------------------------
+	  test.SignatureMinimal=function(){
+      checkExamplePkg("SignaturesMinimal")
+	  }
+    ,
+    #--------------------------------
+	  test.SignatureMinimalWithoutTags=function(){
+      checkExamplePkg("SignaturesMinimalWithoutTags")
+	  }
     ,
     #--------------------------------
 	  test.SignatureMinimalAutoComment=function(){
@@ -42,21 +42,21 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
         writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
       }
-      
+      if(file.exists(pkgDirAutoDocs)){unlink(pkgDirAutoDocs)} 
       # now duplicate the package directory
       R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
       # and unlink the man subdir
       unlink(file.path(pkgDirAutoDocs,"man"),recursive=TRUE)
 
       # create the documentation automatically
-      roxygenize(pkgDirAutoDocs,c("collate", "namespace", "auto_comment_roclet","rd"))
-      #
-      ## perform cran checks on the automatic documentation
-      l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
-      assertCranResultOk(l,msg="devtools::check failed")
+      roxygenize(pkgDirAutoDocs,c("auto_comment_roclet","rd"))
+      
+      # perform cran checks on the automatic documentation
+      #l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
+      #assertCranResultOk(l,msg="devtools::check failed")
           
-	      }
-	    )
+	  }
+  )
 )
 
 ############################################ 

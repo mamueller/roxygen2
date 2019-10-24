@@ -1,7 +1,29 @@
 auto_comment_roclet <- function() {
   roclet("auto_comment")
 }
-# copied from the rd2roxygen package
+
+
+#helper
+automatic_method_arg_description<-function(name,sig){
+  d<-'found automatically by inspection, not documented yet'
+  if (name %in% names(sig)){
+    cl<-sig[[name]]
+    if (cl!='ANY'){
+      d <- paste0(
+        "object of class:",
+        "\\code{",
+        sig[[name]],
+        "}",
+        ', ',
+        d,
+        "."
+      )
+    }
+  }
+  d
+}
+  
+## copied from the rd2roxygen package
 ## wrap strings with comment prefix
 comment_line = function(x, exdent = 0) {
   if (missing(x)) return(comment_prefix())
@@ -24,24 +46,55 @@ comment_prefix = function() {
   getOption("roxygen.comment", "#' ")
 }
 
-object_to_block_lines <- function(x) UseMethod("object_to_block_lines")
+object_to_block_lines <- function(object){ 
+  UseMethod("object_to_block_lines")
+}
+auto_comment_tag_line<- comment_tag("@auto_comment",'These comments were created by the auto_comment_roclet by inspection of the package. If you want to change these comments and avoid your changes to be overwritten remove the @auto_comment tag!')
 
-object_to_block_lines.s4generic<-function(obj){
-  res<-"
-#' Automatically created by inspection 
-#'
-#' @param a1 
-#' @auto_overwrite
-  "
+
+object_to_block_lines.s4generic<-function(object){
+  res <-c(
+    comment_line(paste0("S4 generic: ",object$topic)), #title
+    comment_line(),
+    comment_tag("@name",object$topic),
+    as.character(
+      lapply(
+        names(formals(object$value)),
+        function(arg){
+          comment_tag(
+            tag='@param',
+            value=paste0(arg," see method arguments")
+          )
+        }
+      )
+    ),
+    comment_tag("@s4methods",' '),
+    auto_comment_tag_line
+  )
   res
 }
-object_to_block_lines.s4method<-function(obj){
-  res<-"
-#' Automatically created by inspection 
-#'
-#' @param a1 
-#' @auto_overwrite
-  "
+
+object_to_block_lines.s4method<-function(object){
+  sig <- object$value@defined
+  param_lines<- unlist(
+    lapply(
+      names(formals(object$value)),
+      function(arg){
+        d <-automatic_method_arg_description(name=arg,sig) 
+        comment_tag(
+          tag='@param',
+          value=paste0(arg," ,",d,".")
+        )
+      }
+    )
+  )
+  res <-c(
+    comment_line(paste0("Automatic description: ",object$topic)), #title
+    comment_line(),
+    comment_tag("@name",object$topic),
+    param_lines,
+    auto_comment_tag_line
+  )
   res
 }
 
@@ -53,7 +106,6 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
   # To find them we have to use R's own parse function. 
   #env <- env_package(base_path)
   files <- package_files(base_path)
-  
   a_o<- lapply(
     files,
     function(file){
@@ -73,7 +125,7 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
               # This is a bit od "cargo cult programming" and could be avoided
               # if object_from_call would be changed a little bit
               # at the moment I want to be as least invasive
-              # as possible thogh
+              # as possible though
               b<-roxy_block(tags=list(),file=file,line=5000L,call=call,object=NULL)
               
               # some calls like globalVariables(c(something))
@@ -96,7 +148,7 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
     }
    )
 
-  a_o_flat=list()
+  a_o_flat <- list()
   for(o in a_o) {a_o_flat<-append(a_o_flat,o)}
 
   objectsWithBlocks<-lapply(blocks,function(block){block$object}) 
@@ -124,7 +176,7 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
 roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
   # first sort all the undocumented objects by the file
   # they are defined in
-  files=unique(
+  files <- unique(
     lapply(
       results,
       function(o){
@@ -132,7 +184,6 @@ roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
       }
     )
   )
-
   for (file in files){
     p<-file.path(base_path,"R",file)
     lines<-read_lines(p)
@@ -153,7 +204,6 @@ roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
       function(o){utils::getSrcLocation(attr(o,"srcref"))}
     ))
     
-    browser()
     ord_locations<-locations_org[order(locations_org)]
     # now also order the objects
     ord_os<-os[order(locations_org)]

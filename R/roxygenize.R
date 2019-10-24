@@ -82,17 +82,18 @@ roxygenize <- function(package.dir = ".",
   x<-roclet_find("autotag_roclet")
   if (
     any(
-      purrr::map(
+      as.logical(lapply(
         roclets,
         function(r){all(class(x)==class(r))}
       )
-    )
+    ))
   ){
     # setdiff does not work on list of roclet objects so we implement it
     roclets <- purrr:::keep(
       roclets,
       function(r){!all(class(x)==class(r))}
     )
+    untagged_objects<-roclet_process(x,blocks,env,base_path)
     roclet_output(x, untagged_objects, base_path)
     # parse again
     blocks <- parse_package(base_path, env = NULL)
@@ -110,20 +111,20 @@ roxygenize <- function(package.dir = ".",
   x<-roclet_find("auto_comment_roclet")
   if (
     any(
-      purrr::map(
+      as.logical(lapply(
         roclets,
         function(r){all(class(x)==class(r))}
       )
-    )
+    ))
   ){
     # setdiff does not work on list of roclet objects so we implement it
     roclets <- purrr:::keep(
       roclets,
       function(r){!all(class(x)==class(r))}
     )
+
     untagged_objects<-roclet_process(x,blocks,env,base_path)
-    browser()
-    roclet_output(x, untagged_objects, base_path)
+    roclet_output(x, results=untagged_objects, base_path)
     # parse again
     blocks <- parse_package(base_path, env = NULL)
     blocks <- lapply(blocks, block_set_env, env = env)

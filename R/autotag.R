@@ -1,6 +1,16 @@
 autotag_roclet <- function() {
   roclet("autotag")
 }
+#' @export
+roxy_tag_parse.roxy_tag_auto <- function(x) {
+  tag_words_line(x)
+}
+
+#' @export
+roxy_tag_rd.roxy_tag_auto<- function(x, base_path, env) {
+  value <- NULL
+  rd_section(x$tag, value)
+}
 
 #' @export
 roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
@@ -123,13 +133,4 @@ roclet_output.roclet_autotag <- function(x, results, base_path, ...) {
     }
     write_lines(extendedLines,p)
   }
-
-  #NAMESPACE <- file.path(base_path, "NAMESPACE")
-  #results <- c(made_by("#"), results)
-
-  ## Always check for roxygen2 header before overwriting NAMESPACE (#436),
-  ## even when running for the first time
-  #write_if_different(NAMESPACE, results, check = TRUE)
-
-  #NAMESPACE
 }

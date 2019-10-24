@@ -14,6 +14,7 @@ setMethod(f="G1",
      return()
   }
 )
+
 #' one (partly) documented method
 #'
 setMethod(f="G1",
