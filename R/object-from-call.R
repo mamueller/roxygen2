@@ -143,7 +143,7 @@ parser_setMethod <- function(call, env, block) {
   name <- as.character(call$f)
   value <- methods::getMethod(name, eval(call$signature), where = env)
   value@.Data <- extract_method_fun(value@.Data)
-
+  browser()
   object(value, NULL, "s4method")
 }
 
@@ -266,7 +266,8 @@ print.object <- function(x, ...) {
 
 object_topic <- function(value, alias, type) {
   switch(type,
-    s4method = paste0(value@generic, ",", paste0(value@defined, collapse = ","), "-method"),
+    #s4method = paste0(value@generic, ",", paste0(value@defined, collapse = ","), "-method"),
+    s4method = methodDocName(value),
     s4class = paste0(value@className, "-class"),
     s4generic = value@generic,
     rcclass = paste0(value@className, "-class"),

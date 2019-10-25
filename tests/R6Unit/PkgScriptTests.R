@@ -52,8 +52,8 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       roxygenize(pkgDirAutoDocs,c("auto_comment_roclet","rd"))
       
       # perform cran checks on the automatic documentation
-      #l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
-      #assertCranResultOk(l,msg="devtools::check failed")
+      l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
+      assertCranResultOk(l,msg="devtools::check failed")
           
 	  }
   )

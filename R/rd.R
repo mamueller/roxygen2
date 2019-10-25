@@ -193,10 +193,8 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   rd
 }
 
-methodDocName=function (genName,sig){
-  sigString<-paste0(sig[names(sig)],collapse=",")
-  N=sprintf("%s,%s-method",genName,sigString)
-  N
+methodDocName=function (value){
+    paste0(value@generic, ",", paste0(value@defined, collapse = ","), "-method")
 }
 
 add_method_tags=function (block){
@@ -204,8 +202,7 @@ add_method_tags=function (block){
     aliases<-lapply(
       meths,
       function(m){
-        genName<-attr(m,'generic')[[1]]
-        methodDocName(genName,sig=m@defined)
+        methodDocName(m)
       }
     )
     tt<- roxy_tag(
@@ -222,7 +219,6 @@ add_method_tags=function (block){
 
 block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
   # Must start by processing templates
-  browser()
   block <- process_templates(block, base_path)
 
   if (!needs_doc(block)) {

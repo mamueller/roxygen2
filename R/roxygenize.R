@@ -129,7 +129,6 @@ roxygenize <- function(package.dir = ".",
     blocks <- parse_package(base_path, env = NULL)
     blocks <- lapply(blocks, block_set_env, env = env)
   }
-
   results <- lapply(roclets, roclet_process,
     blocks = blocks,
     env = env,
