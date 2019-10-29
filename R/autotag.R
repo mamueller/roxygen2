@@ -1,6 +1,7 @@
 autotag_roclet <- function() {
   roclet("autotag")
 }
+
 #' @export
 roxy_tag_parse.roxy_tag_auto <- function(x) {
   tag_words_line(x)

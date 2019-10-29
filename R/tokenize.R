@@ -25,6 +25,7 @@ tokenize_file <- function(file, srcref_path = NULL) {
     ),
     block_create
   )
+  browser()
   purrr::compact(blocks)
 }
 

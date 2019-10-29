@@ -143,7 +143,6 @@ parser_setMethod <- function(call, env, block) {
   name <- as.character(call$f)
   value <- methods::getMethod(name, eval(call$signature), where = env)
   value@.Data <- extract_method_fun(value@.Data)
-  browser()
   object(value, NULL, "s4method")
 }
 

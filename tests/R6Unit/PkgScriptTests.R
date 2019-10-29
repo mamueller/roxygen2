@@ -29,6 +29,28 @@ PkgScriptTests<-R6Class("PkgScriptTests",
 	  }
     ,
     #--------------------------------
+	  test.Signature_remove_autotag=function(){
+      targetPkgName<-"SignaturesMinimalWithAutoTags"
+      #requireNamespace("R6Unit")
+      # copy the files 
+      resourceDirName<-file.path("..","..","test_resources","example_packages")
+      pkgDirOrg="pkgDirOrg"
+      pkgDirAutoDocs="pkgDirAutoDocs"
+      R6Unit::cpDir(file.path(resourceDirName,targetPkgName),pkgDirOrg)
+      # if necessarry add a default DESCRIPTION file
+      if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
+        writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
+      }
+      # now duplicate the package directory
+      R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
+      
+      # create the documentation automatically
+      roxygenize(pkgDirAutoDocs,c("remove_autotag_roclet"))
+      
+          
+	  }
+    ,
+    #--------------------------------
 	  test.SignatureMinimalAutoComment=function(){
       targetPkgName<-"SignaturesMinimalWithoutTags"
       #requireNamespace("R6Unit")
@@ -42,7 +64,6 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
         writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
       }
-      if(file.exists(pkgDirAutoDocs)){unlink(pkgDirAutoDocs)} 
       # now duplicate the package directory
       R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
       # and unlink the man subdir
