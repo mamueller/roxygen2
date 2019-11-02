@@ -9,7 +9,8 @@ require("pkgload")
 source("PkgScriptTests.R")
 
 s<-TestSuite$new(list(
-  PkgScriptTests$new('test.Signature_remove_autotag')
+  #PkgScriptTests$new('test.Signature_remove_autotag')
+  PkgScriptTests$new('test.SignatureMinimal_update_auto_comment')
 ))
 print(s$test_names())
 #s$parallel <- 1 

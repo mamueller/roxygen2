@@ -3,7 +3,6 @@ remove_autotag_roclet <- function() {
 }
 #' @export
 roclet_process.roclet_remove_autotag <- function(x, blocks, env, base_path) {
-  browser()
   
  
   results<-purrr::keep(
@@ -12,6 +11,8 @@ roclet_process.roclet_remove_autotag <- function(x, blocks, env, base_path) {
   )
   results
 }
+
+
 
 #' @export
 roclet_output.roclet_remove_autotag <- function(x, blocks_with_auto, base_path, ...) {
@@ -32,18 +33,25 @@ roclet_output.roclet_remove_autotag <- function(x, blocks_with_auto, base_path, 
         )
       )
     ]
-    # now sort the undocumented objects in the order in which they appear in the file
-    auto_lines<-lapply(
-      bs,
-      function(block){
-        auto_tags<-purrr::keep(
-          block$tags,
-          .p=function(tag){tag$tag=='auto'}
-        )
-        auto_tags[[1]]$line
-      }
+    # find the @auto lines
+    auto_pos<-unlist(
+      lapply(
+        bs,
+        function(block){
+          lapply(
+            purrr::keep(
+              block$tags,
+              .p=function(tag){tag$tag=='auto'}
+            ),
+            function(tag){tag$line}
+          )
+        }
+      )
     )
-    browser()
-    auto_lines
+    auto_pos
+    base::writeLines(
+      text=lines[setdiff(seq_along(lines),auto_pos)],
+      con=file
+    )
   }
 }

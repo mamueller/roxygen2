@@ -106,7 +106,7 @@ roxygenize <- function(package.dir = ".",
   # It thereby decreases the number of blocks 
   # that will be discovered by parsing and consequently has to run
   # before the rd_roclet 
-  x<-roclet_find("autotag_roclet")
+  x<-roclet_find("remove_autotag_roclet")
   if (
     any(
       as.logical(lapply(
@@ -156,6 +156,31 @@ roxygenize <- function(package.dir = ".",
     blocks <- parse_package(base_path, env = NULL)
     blocks <- lapply(blocks, block_set_env, env = env)
   }
+
+  # Special case update_auto_comment: 
+  # The roclet changes the source code by changing 
+  # roxygen comments of objects that have the @auto_comments
+  # tag in their roxygenblock 
+  # It has to run before the rd_roclet that will produce documentation
+  # for those objects.
+  x<-roclet_find("update_auto_comment_roclet")
+  if (
+    any(
+      as.logical(lapply(
+        roclets,
+        function(r){all(class(x)==class(r))}
+      )
+    ))
+  ){
+    # setdiff does not work on list of roclet objects so we implement it
+    roclets <- purrr::discard(
+      roclets,
+      function(r){all(class(x)==class(r))}
+    )
+    blocks_with_auto_comment_tag<-roclet_process(x,blocks,env,base_path)
+    roclet_output(x, results=blocks_with_auto_comment_tag, base_path)
+  }
+
   results <- lapply(roclets, roclet_process,
     blocks = blocks,
     env = env,

@@ -49,7 +49,7 @@ comment_prefix = function() {
 object_to_block_lines <- function(object){ 
   UseMethod("object_to_block_lines")
 }
-auto_comment_tag_line<- comment_tag("@auto_comment",'These comments were created by the auto_comment_roclet by inspection of the package. If you want to change these comments and avoid your changes to be overwritten remove the @auto_comment tag!')
+auto_comment_tag_line<- comment_tag("@autocomment,",' These comments were created by the auto_comment_roclet by inspection of the package. If you want to change these comments and avoid your changes to be overwritten remove the @auto_comment tag!')
 
 
 object_to_block_lines.s4generic<-function(object){
@@ -153,13 +153,13 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
 
   objectsWithBlocks<-lapply(blocks,function(block){block$object}) 
   # find the undocumented objects
-  results<-setdiff(a_o_flat,objectsWithBlocks)
+  untagged_objects<-setdiff(a_o_flat,objectsWithBlocks)
 
   # only tag objects for which " #' @auto_comment " can produce   
-  # comments that the rd roclet can transfor cran-proof documentation .
+  # comments that the rd roclet can transfer to cran-proof documentation .
   # The list of supported classes is intended to grow but we are cautious for now... 
-  results<-purrr::keep(
-    results,
+  untagged_objects<-purrr::keep(
+    untagged_objects,
     .p=function(obj){
       cls<-c('s4method','s4generic')
       any(vapply(
@@ -169,16 +169,20 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
       ))
     }
   )
-  results
+  untagged_objects
 }
 
+
+
+
 #' @export
-roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
+roclet_output.roclet_auto_comment<- function(x, untagged_objects, base_path, ...) {
+  # first handle the untagged objects
   # first sort all the undocumented objects by the file
   # they are defined in
   files <- unique(
     lapply(
-      results,
+      untagged_objects,
       function(o){
         utils::getSrcFilename(attr(o,"srcref"))
       }
@@ -188,10 +192,10 @@ roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
     p<-file.path(base_path,"R",file)
     lines<-read_lines(p)
     # find the untagged objects in a specific file
-    os<-results[
+    os<-untagged_objects[
       as.logical(
         lapply(
-          results,
+          untagged_objects,
           function(o){
             utils::getSrcFilename(attr(o,"srcref"))==file
           }
