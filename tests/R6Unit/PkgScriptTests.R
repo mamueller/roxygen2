@@ -80,7 +80,7 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     ,
     #--------------------------------
 	  test.SignatureMinimal_update_auto_comment=function(){
-      targetPkgName<-"SignaturesMinimalWithAutoComments"
+      targetPkgName<-"SignaturesMinimalWithAutdatedAutoComments"
       #requireNamespace("R6Unit")
       # copy the files 
       resourceDirName<-file.path("..","..","test_resources","example_packages")
@@ -97,13 +97,13 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       # and unlink the man subdir
       unlink(file.path(pkgDirAutoDocs,"man"),recursive=TRUE)
 
-      # create the documentation automatically
-      roxygenize(pkgDirAutoDocs,c("update_auto_comment_roclet"))
-      #roxygenize(pkgDirAutoDocs,c("update_auto_comment_roclet","rd"))
+      # update the documentation automatically
+      #roxygenize(pkgDirAutoDocs,c("update_auto_comment_roclet"))
+      roxygenize(pkgDirAutoDocs,c("update_auto_comment_roclet","rd"))
       
       # perform cran checks on the automatic documentation
-      #l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
-      #assertCranResultOk(l,msg="devtools::check failed")
+      l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
+      assertCranResultOk(l,msg="devtools::check failed")
           
 	  }
   )

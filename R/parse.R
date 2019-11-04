@@ -52,7 +52,6 @@ parse_file <- function(file,
 #' @export
 #' @rdname parse_package
 parse_text <- function(text, env = env_file(file)) {
-
   file <- tempfile()
   write_lines(text, file)
   on.exit(unlink(file))
