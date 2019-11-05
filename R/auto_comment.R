@@ -176,13 +176,13 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
 
 
 #' @export
-roclet_output.roclet_auto_comment<- function(x, untagged_objects, base_path, ...) {
+roclet_output.roclet_auto_comment<- function(x, results, base_path, ...) {
   # first handle the untagged objects
   # first sort all the undocumented objects by the file
   # they are defined in
   files <- unique(
     lapply(
-      untagged_objects,
+      results,
       function(o){
         utils::getSrcFilename(attr(o,"srcref"))
       }
@@ -192,10 +192,10 @@ roclet_output.roclet_auto_comment<- function(x, untagged_objects, base_path, ...
     p<-file.path(base_path,"R",file)
     lines<-read_lines(p)
     # find the untagged objects in a specific file
-    os<-untagged_objects[
+    os<-results[
       as.logical(
         lapply(
-          untagged_objects,
+          results,
           function(o){
             utils::getSrcFilename(attr(o,"srcref"))==file
           }

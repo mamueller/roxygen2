@@ -20,10 +20,10 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     }
     ,
     ##--------------------------------
-	  test.Error=function(){
-      stopifnot(FALSE)
-	  }
-    ,
+	  #test.Error=function(){
+    #  stopifnot(FALSE)
+	  #}
+    #,
     ##--------------------------------
 	  test.SignatureMinimal=function(){
       checkExamplePkg("SignaturesMinimal")
@@ -61,7 +61,7 @@ PkgScriptTests<-R6Class("PkgScriptTests",
 	  }
     ,
     #--------------------------------
-	  test.SignatureMinimalAutoComment=function(){
+	  test.SignatureMinimal_create_autocomment=function(){
       targetPkgName<-"SignaturesMinimalWithoutTags"
       #requireNamespace("R6Unit")
       # copy the files 

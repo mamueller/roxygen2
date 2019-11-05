@@ -153,7 +153,7 @@ roxygenize <- function(package.dir = ".",
     )
 
     untagged_objects<-roclet_process(x,blocks,env,base_path)
-    roclet_output(x, results=untagged_objects, base_path)
+    roclet_output(x, results=untagged_objects, base_path=base_path)
     # parse again
     blocks <- parse_package(base_path, env = NULL)
     blocks <- lapply(blocks, block_set_env, env = env)
