@@ -18,7 +18,7 @@ roclet_process.roclet_remove_autotag <- function(x, blocks, env, base_path) {
 roclet_output.roclet_remove_autotag <- function(x, blocks_with_auto, base_path, ...) {
   # first sort all the undocumented objects by the file
   # they are defined in
-  files<-unique(lapply(blocks_with_auto,function(block) block$file))
+  files<-unique(lapply(blocks_with_auto,function(block){block$file}))
 
   for (file in files){
     lines<-read_lines(file)

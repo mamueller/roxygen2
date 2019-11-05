@@ -15,8 +15,14 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       source('../../checkExamplePackage.R')
       requireNamespace("pkgload")
       requireNamespace("debugHelpers")
-      pkgload::load_all('../../../../')
+      #pkgload::load_all('../../../../')
+      pkgload::load_all('../../../../',export_all=FALSE)
     }
+    ,
+    ##--------------------------------
+	  test.Error=function(){
+      stopifnot(FALSE)
+	  }
     ,
     ##--------------------------------
 	  test.SignatureMinimal=function(){
@@ -30,6 +36,7 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     ,
     #--------------------------------
 	  test.Signature_remove_autotag=function(){
+      source('../../number_of_auto_lines.R')
       targetPkgName<-"SignaturesMinimalWithAutoTags"
       #requireNamespace("R6Unit")
       # copy the files 
@@ -41,13 +48,16 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
         writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
       }
+      before<-number_of_auto_lines(pkgDirOrg)
+      stopifnot(before>0)
       # now duplicate the package directory
       R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
       
-      # create the documentation automatically
+       
+      # remove the @auto lines
       roxygenize(pkgDirAutoDocs,c("remove_autotag_roclet"))
-      
-          
+      after <-number_of_auto_lines(pkgDirAutoDocs)
+      stopifnot(after==0) 
 	  }
     ,
     #--------------------------------

@@ -109,19 +109,21 @@ roxygenize <- function(package.dir = ".",
   x<-roclet_find("remove_autotag_roclet")
   if (
     any(
-      as.logical(lapply(
-        roclets,
-        function(r){all(class(x)==class(r))}
+      as.logical(
+        lapply(
+          roclets,
+          function(r){all(class(x)==class(r))}
+        )
       )
-    ))
+    )
   ){
     # setdiff does not work on list of roclet objects so we implement it
     roclets <- purrr:::keep(
       roclets,
       function(r){!all(class(x)==class(r))}
     )
-    blocks_with_auto<-roclet_process(x,blocks,env,base_path)
-    roclet_output(x, untagged_objects, base_path)
+    blocks_with_auto <-roclet_process(x,blocks,env,base_path)
+    roclet_output(x, blocks_with_auto , base_path)
     # parse again
     blocks <- parse_package(base_path, env = NULL)
     blocks <- lapply(blocks, block_set_env, env = env)
