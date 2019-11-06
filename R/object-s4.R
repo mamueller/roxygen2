@@ -9,6 +9,8 @@ roxy_tag_parse.roxy_tag_s4methods<- function(x) {
 roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
   rd_section("s4methods",x$val)
 }
+
+#' @export
 format.rd_section_s4methods <- function(x, ...) {
   paste0(
     "\\section{S4 methods for this generic}{\n",

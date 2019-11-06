@@ -3,26 +3,6 @@ auto_comment_roclet <- function() {
 }
 
 
-#helper
-automatic_method_arg_description<-function(name,sig){
-  d<-'found automatically by inspection, not documented yet'
-  if (name %in% names(sig)){
-    cl<-sig[[name]]
-    if (cl!='ANY'){
-      d <- paste0(
-        "object of class:",
-        "\\code{",
-        sig[[name]],
-        "}",
-        ', ',
-        d,
-        "."
-      )
-    }
-  }
-  d
-}
-  
 ## copied from the rd2roxygen package
 ## wrap strings with comment prefix
 comment_line = function(x, exdent = 0) {
@@ -49,7 +29,11 @@ comment_prefix = function() {
 object_to_block_lines <- function(object){ 
   UseMethod("object_to_block_lines")
 }
-auto_comment_tag_line<- comment_tag("@autocomment,",' These comments were created by the auto_comment_roclet by inspection of the package. If you want to change these comments and avoid your changes to be overwritten remove the @auto_comment tag!')
+auto_comment_tag_lines <- comment_tag("@autocomment ",' These comments were created by the auto_comment_roclet by inspection of the code. 
+You can use the "update_auto_comment_roclet" to automatically adapt them to changes in the source code.
+This will remove `@param` tags for parameters that are no longer present in 
+the source code and add `@param` tags with a default description for yet undocumented parameters. 
+If you remove this `@autocomment` tag your comments will no longer be touched by the "update_autocomment_roclet".')
 
 
 object_to_block_lines.s4generic<-function(object){
@@ -69,23 +53,17 @@ object_to_block_lines.s4generic<-function(object){
       )
     ),
     comment_tag("@s4methods",' '),
-    auto_comment_tag_line
+    auto_comment_tag_lines
   )
   res
 }
 
 object_to_block_lines.s4method<-function(object){
-  sig <- object$value@defined
+  extra_tags <- extra_param_tags(object)
   param_lines<- unlist(
     lapply(
-      names(formals(object$value)),
-      function(arg){
-        d <-automatic_method_arg_description(name=arg,sig) 
-        comment_tag(
-          tag='@param',
-          value=paste0(arg," ,",d,".")
-        )
-      }
+      extra_tags,
+      param_tag_to_block_lines
     )
   )
   res <-c(
@@ -93,7 +71,7 @@ object_to_block_lines.s4method<-function(object){
     comment_line(),
     comment_tag("@name",object$topic),
     param_lines,
-    auto_comment_tag_line
+    auto_comment_tag_lines
   )
   res
 }
@@ -122,10 +100,11 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
               # fixme:
               # create a pseudo block to be able to call object_from_call with
               # a block argument. 
-              # This is a bit od "cargo cult programming" and could be avoided
+              # This is a bit of "cargo cult programming" and could be avoided
               # if object_from_call would be changed a little bit
               # at the moment I want to be as least invasive
-              # as possible though
+              # as possible though and integrate it in case the pull request 
+              # is accepted
               b<-roxy_block(tags=list(),file=file,line=5000L,call=call,object=NULL)
               
               # some calls like globalVariables(c(something))

@@ -8,14 +8,11 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     ,
     #------------------------
     setUp=function(){
-      #source('../../cpDir.R')
       source('../../writeDescriptionFile.R')
-      #source('../../cp_package_files.R')
       source('../../assertCranResultOk.R')
       source('../../checkExamplePackage.R')
       requireNamespace("pkgload")
       requireNamespace("debugHelpers")
-      #pkgload::load_all('../../../../')
       pkgload::load_all('../../../../',export_all=FALSE)
     }
     ,
@@ -63,7 +60,6 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     #--------------------------------
 	  test.SignatureMinimal_create_autocomment=function(){
       targetPkgName<-"SignaturesMinimalWithoutTags"
-      #requireNamespace("R6Unit")
       # copy the files 
       resourceDirName<-file.path("..","..","test_resources","example_packages")
       pkgDirOrg="pkgDirOrg"
@@ -76,7 +72,8 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       }
       # now duplicate the package directory
       R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
-      # and unlink the man subdir
+
+      # and unlink the man subdir (in case there is some documentation in pkgDirOrg/man )
       unlink(file.path(pkgDirAutoDocs,"man"),recursive=TRUE)
 
       # create the documentation automatically

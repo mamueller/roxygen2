@@ -4,7 +4,7 @@ autotag_roclet <- function() {
 
 #' @export
 roxy_tag_parse.roxy_tag_auto <- function(x) {
-  tag_words_line(x)
+  tag_words(x)
 }
 
 #' @export
@@ -61,8 +61,10 @@ roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
   # find the undocumented objects
   results<-setdiff(a_o_flat,objectsWithBlocks)
 
-  # only tag objects for which " #' @auto " can produce a cran-proof documentation 
-  # The list of supported classes is intended to grow but we are cautious for now... 
+  # In the future other objects could be supported as well
+  # e.g. S4 classes, R6 classes and methods, reference classes ...
+  # 
+  # but for now we stick to s4-generics and methods 
   results<-purrr::keep(
     results,
     .p=function(obj){

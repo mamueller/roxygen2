@@ -38,7 +38,7 @@ update_auto_comment_roclet<- function() {
 
 #' @export
 roxy_tag_parse.roxy_tag_autocomment <- function(x) {
-  tag_words_line(x)
+  tag_words(x)
 }
 
 roxy_tag_rd.roxy_tag_autocomment<- function(x, base_path, env) {
@@ -134,15 +134,6 @@ update_block_autocomments<-function(block,lines){
         function(nr) nr %in% remove
       )
     ]
-    #s_par_tags<-param_tags[order(pos,decreasing=TRUE)]
-    #for (tag in s_par_tags){ 
-    #      first_line<-tag$line
-    #      last_line<-sorted_tag_lines[[match(tag$line,sorted_tag_lines)+1]]-1
-    #      browser()
-    #      lines<-lines[setdiff(seq_along(lines),first_line:last_line)]
-
-    #    #remove those lines
-    # }
     
     documented_args<-lapply(
       param_tags,
@@ -192,38 +183,41 @@ extra_param_tags<- function(object, names) {
   UseMethod("extra_param_tags")
 }
 
-extra_param_tags.s4method<-function(object,names){
+extra_param_tags.s4method<-function(object,param_names=names(formals(object$value))){
   sig<-object$value@defined
   lapply(
-    names,
+    param_names,
     function(name,object){
-      description<-'not manually documented yet , found by inspection'
+      d<-'no manual documentation'
       if (name %in% names(sig)){
-        d <- paste("object of class:", "\\code{",sig[[name]],"}",'. ' ,description,sep='')
-        tag <- roxy_tag(
-          tag='param',
-          raw=paste0(name,': ',d,sep=''),
-          val=list("name"=name,description=d)
-        )
-      }else{
-        d<-description
+        cl<-sig[[name]]
+        if (cl!='ANY'){
+          d <- paste0(
+            "object of class:",
+            "\\code{",
+            sig[[name]],
+            "}",
+            ', ',
+            d
+          )
+        }
       }
       roxy_tag(
         tag='param',
-        raw=paste(name,': ',d,sep=''),
+        raw=paste(name,d),
         val=list("name"=name,description=d)
       )
     }
   )
 }
-extra_param_tags.s4generic<-function(object,names){
+extra_param_tags.s4generic<-function(object,param_names=names(formals(object$value))){
   lapply(
-    names,
+    param_names,
     function(name) {
-      d<-'not manually documented, see method documentation'
+      d<-'no manual documentation, see method documentation'
       roxy_tag(
         tag='param',
-        raw=paste(name,': ',d,sep=''),
+        raw=paste(name,d),
         val=list("name"=name,description=d)
       )
     }
@@ -266,7 +260,7 @@ param_tag_to_block_lines<-function(tag){
   d   <-value$description
   line<-comment_tag(
     tag='@param',
-    value=paste0(name,': ',d)
+    value=paste0(name,' : ',d)
   )
   line
 }
