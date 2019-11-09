@@ -103,11 +103,13 @@ block_to_rd <- function(block, base_path, env) {
   UseMethod("block_to_rd")
 }
 
+
 #' @export
 
 block_to_rd.default <- function(block, ...) {
   stop("Internal roxygen error, unknown block type")
 }
+
 
 #' @export
 
@@ -135,46 +137,34 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   # create empty tags for undocumented params
 
   function_args<-names(formals(block$object$value))
-  sig <- block$object$value@defined
-  present_tags<-block_get_tags(block,'param')
-  documented_args<-unlist( lapply(present_tags,function(tag){tag$val$name}))
+  md <- block$object$value
+  sig <- md@defined
+  genName <- attr(md,'generic')[[1]]
+
+  present_param_tags<-block_get_tags(block,'param')
+  other_tags<-setdiff(block$tags,present_param_tags)
+  documented_args<-unlist( lapply(present_param_tags,function(tag){tag$val$name}))
   
-  extra_tags <- lapply(
-    setdiff(function_args,documented_args)
-    ,function(arg){
-      res=
-      roxy_tag(
-        tag='param'
-        ,raw=paste(arg,':',sep='')
-        ,val=list("name"=arg,description="")
-      )
+  extra_tags <- extra_param_tags(block$object, param_names=setdiff(function_args,documented_args))
+  
+  # now add the class information to the description of all param tags 
+  updated_param_tags <- lapply(
+    append(present_param_tags,extra_tags),
+    function(tag){
+      v<-tag$val
+      if (v$name %in% names(sig) && sig[[v$name]] !='ANY'){
+        d <- paste("object of class:", "\\code{",sig[[v$name]],"}",', ' ,v$description,sep='')
+        tag <- roxy_tag(
+          tag='param',
+          raw=paste(v$name,': ',d,sep=''),
+          val=list("name"=v$name,description=d)
+        )
+      }
+      tag
     }
   )
-  block$tags <- append(
-    block$tags,
-    lapply(
-      append(present_tags,extra_tags),
-      function(tag){
-        v<-tag$val
-        if (v$name %in% names(sig)){
-          d <- paste("object of class:", "\\code{",sig[[v$name]],"}",'. ' ,v$description,sep='')
-          tag <- roxy_tag(
-            tag='param',
-            raw=paste(v$name,': ',d,sep=''),
-            val=list("name"=v$name,description=d)
-          )
-        }else{
-          d<-'found automatically by inspection, not documented yet'
-          tag <- roxy_tag(
-            tag='param',
-            raw=paste(v$name,': ',d,sep=''),
-            val=list("name"=v$name,description=d)
-          )
-        }
-        return(tag)
-      }
-    )
-  )
+  block$tags <- append(other_tags,updated_param_tags)
+  
   rd <- RoxyTopic$new()
   topic_add_name_aliases(rd, block, name)
   for (tag in block$tags) {
@@ -188,7 +178,17 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
   
 
   describe_rdname <- topic_add_describe_in(rd, block, env)
-  filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
+
+  hash_name=NULL
+  if (stringr::str_length(name)>16){
+    # If the filename for the *.Rd  file would get too long
+    # too long to be accepted by cran due to limitations 
+    # of the  'tar ' program 
+    # we compute a hash for the signature which is much shorter 
+    # also unique (at least with with very high probality)
+    hash_name<-paste0(genName,"-method_",digest::digest(as.character(sig)))
+  }
+  filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% hash_name %||% nice_name(name)
   rd$filename <- paste0(filename, ".Rd")
   rd
 }
@@ -345,6 +345,8 @@ block_to_rd.roxy_block_r6class <- function(block, base_path, env) {
   topic_add_r6_methods(rd, block, env)
 
   describe_rdname <- topic_add_describe_in(rd, block, env)
+
+  
   filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
   rd$filename <- paste0(filename, ".Rd")
 

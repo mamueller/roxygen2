@@ -2,27 +2,21 @@
 % Please edit documentation in R/source.R
 \name{G1}
 \alias{G1}
-\title{A funny generic}
+\title{S4 generic: G1}
 \usage{
-G1(a1, a2, a3, ...)
+G1(a1, a2)
 }
 \arguments{
 \item{a1}{see method arguments}
 
 \item{a2}{see method arguments}
-
-\item{a3}{see method arguments}
-
-\item{...}{see method arguments}
 }
 \description{
-A funny generic
+S4 generic: G1
 }
 \section{S4 methods for this generic}{
 \itemize{
-  \item \code{\link{G1,logical,ANY-method}}
-  \item \code{\link{G1,numeric,ANY-method}}
-  \item \code{\link{G1,numeric,character-method}}
+  \item \code{\link{G1,numeric-method}}
 }
 }
 

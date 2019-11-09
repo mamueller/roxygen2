@@ -104,7 +104,7 @@ update_block_autocomments<-function(block,lines){
               block$tags,
               function(tag){
               # fixme:
-              # for some reason the title tag yields has the line attribute 
+              # for some reason the title tag has the line attribute 
               # always set to 1 for all blocks which is certainly wrong if
               # interpreted as a line number in the src file 
               # but I do not know if it serves another purpose
@@ -174,32 +174,39 @@ update_block_autocomments<-function(block,lines){
       lines[(line_nr+1):length(lines)]
     )
   }
-  browser()
  new_lines
 }
 
 #helper
-extra_param_tags<- function(object, names) {
+extra_param_tags<- function(object, names,...) {
   UseMethod("extra_param_tags")
 }
 
-extra_param_tags.s4method<-function(object,param_names=names(formals(object$value))){
+extra_param_tags.s4method<-function(
+  object,
+  param_names=names(formals(object$value)),
+  class_info=FALSE  
+){
   sig<-object$value@defined
   lapply(
     param_names,
     function(name,object){
       d<-'no manual documentation'
-      if (name %in% names(sig)){
-        cl<-sig[[name]]
-        if (cl!='ANY'){
-          d <- paste0(
-            "object of class:",
-            "\\code{",
-            sig[[name]],
-            "}",
-            ', ',
-            d
-          )
+      if (class_info){ 
+        # actually this flag should not be needed at all if we allow  block_to_rd.roxy_block_s4method 
+        # to add the class information to all param tags
+        if (name %in% names(sig)){
+          cl<-sig[[name]]
+          if (cl!='ANY'){
+            d <- paste0(
+              "object of class:",
+              "\\code{",
+              sig[[name]],
+              "}",
+              ', ',
+              d
+            )
+          }
         }
       }
       roxy_tag(
@@ -249,7 +256,7 @@ update_file_autocomments<-function(file,results){
   for (block in bs){
       lines<-update_block_autocomments(block,lines)
       # find the start lines of all the tags in the block (except the title tag)
-      #write_lines(lines,file)
+      write_lines(lines,file)
   } 
 }
 

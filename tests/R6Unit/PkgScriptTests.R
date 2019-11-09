@@ -15,21 +15,77 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       requireNamespace("debugHelpers")
       pkgload::load_all('../../../../',export_all=FALSE)
     }
-    ,
+    
+
+
+    #,
     ##--------------------------------
 	  #test.Error=function(){
     #  stopifnot(FALSE)
 	  #}
-    #,
+    
+    
+    
+    ,
     ##--------------------------------
 	  test.SignatureMinimal=function(){
-      checkExamplePkg("SignaturesMinimal")
+      checkExamplePkg(
+        "SignaturesMinimal",
+        roclets=c(
+          "collate", 
+          "namespace",
+          "rd"
+        )
+      )
 	  }
     ,
     #--------------------------------
-	  test.SignatureMinimalWithoutTags=function(){
-      checkExamplePkg("SignaturesMinimalWithoutTags")
+	  test.SignatureMinimal_autotag=function(){
+      checkExamplePkg(
+        "SignaturesMinimalWithoutTags",
+        roclets=c(
+          "collate",
+          "namespace",
+          "autotag_roclet",
+          "rd"
+        )
+      )
 	  }
+    
+    
+    
+    ,
+    #--------------------------------
+	  test.SignatureMinimal_autocomment=function(){
+      checkExamplePkg(
+        "SignaturesMinimalWithoutTags",
+        roclets=c(
+          "collate",
+          "namespace",
+          "auto_comment_roclet",
+          "rd"
+        )
+      )
+	  }
+    
+    
+    
+    ,
+    #--------------------------------
+	  test.SignatureMinimal_update_auto_comment=function(){
+      checkExamplePkg(
+        "SignaturesMinimalWithOutdatedAutoComments",
+        roclets=c(
+          "collate",
+          "namespace",
+          "update_auto_comment_roclet",
+          "rd"
+        )
+      )
+	  }
+    
+    
+    
     ,
     #--------------------------------
 	  test.Signature_remove_autotag=function(){
@@ -56,63 +112,11 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       after <-number_of_auto_lines(pkgDirAutoDocs)
       stopifnot(after==0) 
 	  }
-    ,
-    #--------------------------------
-	  test.SignatureMinimal_create_autocomment=function(){
-      targetPkgName<-"SignaturesMinimalWithoutTags"
-      # copy the files 
-      resourceDirName<-file.path("..","..","test_resources","example_packages")
-      pkgDirOrg="pkgDirOrg"
-      pkgDirAutoDocs="pkgDirAutoDocs"
-      R6Unit::cpDir(file.path(resourceDirName,targetPkgName),pkgDirOrg)
-      
-      # if necessarry add a default DESCRIPTION file
-      if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
-        writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
-      }
-      # now duplicate the package directory
-      R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
 
-      # and unlink the man subdir (in case there is some documentation in pkgDirOrg/man )
-      unlink(file.path(pkgDirAutoDocs,"man"),recursive=TRUE)
 
-      # create the documentation automatically
-      roxygenize(pkgDirAutoDocs,c("auto_comment_roclet","rd"))
-      
-      # perform cran checks on the automatic documentation
-      l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
-      assertCranResultOk(l,msg="devtools::check failed")
-          
-	  }
-    ,
-    #--------------------------------
-	  test.SignatureMinimal_update_auto_comment=function(){
-      targetPkgName<-"SignaturesMinimalWithAutdatedAutoComments"
-      #requireNamespace("R6Unit")
-      # copy the files 
-      resourceDirName<-file.path("..","..","test_resources","example_packages")
-      pkgDirOrg="pkgDirOrg"
-      pkgDirAutoDocs="pkgDirAutoDocs"
-      R6Unit::cpDir(file.path(resourceDirName,targetPkgName),pkgDirOrg)
-      
-      # if necessarry add a default DESCRIPTION file
-      if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
-        writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
-      }
-      # now duplicate the package directory
-      R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
-      # and unlink the man subdir
-      unlink(file.path(pkgDirAutoDocs,"man"),recursive=TRUE)
 
-      # update the documentation automatically
-      #roxygenize(pkgDirAutoDocs,c("update_auto_comment_roclet"))
-      roxygenize(pkgDirAutoDocs,c("update_auto_comment_roclet","rd"))
-      
-      # perform cran checks on the automatic documentation
-      l<-devtools::check(pkgDirAutoDocs,document=FALSE,quiet=FALSE,cran=TRUE,check_dir='.')
-      assertCranResultOk(l,msg="devtools::check failed")
-          
-	  }
+
+
   )
 )
 

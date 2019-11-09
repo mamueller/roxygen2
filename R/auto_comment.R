@@ -38,9 +38,12 @@ If you remove this `@autocomment` tag your comments will no longer be touched by
 
 object_to_block_lines.s4generic<-function(object){
   res <-c(
-    comment_line(paste0("S4 generic: ",object$topic)), #title
+    # We do not want any information in the comments that could 
+    # become outdated (and therefore would have to be updated)
+    # therefore we use a very generic title and particularly avaoid to set
+    # the name and alias tags. 
+    comment_line('automatic title'), 
     comment_line(),
-    comment_tag("@name",object$topic),
     as.character(
       lapply(
         names(formals(object$value)),
@@ -67,9 +70,13 @@ object_to_block_lines.s4method<-function(object){
     )
   )
   res <-c(
-    comment_line(paste0("Automatic description: ",object$topic)), #title
+    # We do not want any information in the comments that could 
+    # become outdated (and therefore would have to be updated)
+    # therefore we use a very generic title and particularly avaoid to set
+    # the name and alias tags. (If they were outdated the would even 
+    # cause trouble with the automatic links from the generics...
+    comment_line('automatic title'), 
     comment_line(),
-    comment_tag("@name",object$topic),
     param_lines,
     auto_comment_tag_lines
   )

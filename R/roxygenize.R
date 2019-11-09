@@ -181,6 +181,9 @@ roxygenize <- function(package.dir = ".",
     )
     blocks_with_auto_comment_tag<-roclet_process(x,blocks,env,base_path)
     roclet_output(x, results=blocks_with_auto_comment_tag, base_path)
+    # parse again
+    blocks <- parse_package(base_path, env = NULL)
+    blocks <- lapply(blocks, block_set_env, env = env)
   }
 
   results <- lapply(roclets, roclet_process,
