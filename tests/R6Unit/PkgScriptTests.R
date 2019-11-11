@@ -28,6 +28,49 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     
     ,
     ##--------------------------------
+	  test.S4Class_autocomment=function(){
+      checkExamplePkg(
+        "S4ClassWithoutTags",
+        roclets=c(
+          "auto_comment_roclet",
+          "rd"
+        )
+      )
+	  }
+    
+    
+    
+    ,
+    ##--------------------------------
+	  test.S4Class_autotag=function(){
+      checkExamplePkg(
+        "S4ClassWithoutTags",
+        roclets=c(
+          "autotag_roclet",
+          "rd"
+        )
+      )
+	  }
+    
+    
+    
+    ,
+    ##--------------------------------
+	  test.S4Class=function(){
+      checkExamplePkg(
+        "S4Class",
+        roclets=c(
+          "collate", 
+          "namespace",
+          "rd"
+        )
+      )
+	  }
+    
+    
+    
+    ,
+    ##--------------------------------
 	  test.SignatureMinimal=function(){
       checkExamplePkg(
         "SignaturesMinimal",

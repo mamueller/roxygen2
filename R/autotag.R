@@ -68,7 +68,7 @@ roclet_process.roclet_autotag <- function(x, blocks, env, base_path) {
   results<-purrr::keep(
     results,
     .p=function(obj){
-      cls<-c('s4method','s4generic')
+      cls<-c('s4method','s4generic','s4class')
       any(vapply(
         cls,
         function(cl){inherits(obj,cl)},

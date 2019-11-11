@@ -35,6 +35,20 @@ This will remove `@param` tags for parameters that are no longer present in
 the source code and add `@param` tags with a default description for yet undocumented parameters. 
 If you remove this `@autocomment` tag your comments will no longer be touched by the "update_autocomment_roclet".')
 
+object_to_block_lines.s4class<-function(object){
+  res <-c(
+    # We do not want any information in the comments that could 
+    # become outdated (and therefore would have to be updated)
+    # therefore we use a very generic title and particularly avaoid to set
+    # the name and alias tags. 
+    comment_line('automatic title'), 
+    comment_line(),
+    auto_comment_tag_lines
+    # we could add slot tags in the future but sometimes I do not want to document slots
+  )
+  res
+}
+
 
 object_to_block_lines.s4generic<-function(object){
   res <-c(
@@ -147,7 +161,7 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
   untagged_objects<-purrr::keep(
     untagged_objects,
     .p=function(obj){
-      cls<-c('s4method','s4generic')
+      cls<-c('s4method','s4generic','s4class')
       any(vapply(
         cls,
         function(cl){inherits(obj,cl)},

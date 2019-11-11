@@ -111,6 +111,87 @@ block_to_rd.default <- function(block, ...) {
 }
 
 
+
+#' @export
+
+block_to_rd.roxy_block_s4class<- function(block, base_path, env) {
+  # Must start by processing templates
+  block <- process_templates(block, base_path)
+  if (!needs_doc(block)) {
+    return()
+  }
+  name <- block_get_tag(block, "name")$val %||% block$object$topic
+  if (is.null(name)) {
+    roxy_tag_warning(block$tags[[1]], "Missing name")
+    return()
+  }
+  
+  if (block_has_tags(block, "auto")){
+    #str<-block$object$topic
+    str<-block$object$topic
+    tt<- roxy_tag(
+        tag='title',
+        raw=str,
+        val=str
+      )
+    block$tags<-append(block$tags,list(tt))
+    
+    d<-'no manual documentation'
+    tt<- roxy_tag(
+        tag='description',
+        raw=d,
+        val=d
+      )
+    block$tags<-append(block$tags,list(tt))
+  }
+  # create empty tags for undocumented params
+
+  #function_args<-names(formals(block$object$value))
+  #md <- block$object$value
+  #sig <- md@defined
+  #genName <- attr(md,'generic')[[1]]
+
+  #present_param_tags<-block_get_tags(block,'param')
+  #other_tags<-setdiff(block$tags,present_param_tags)
+  #documented_args<-unlist( lapply(present_param_tags,function(tag){tag$val$name}))
+  #
+  #extra_tags <- extra_param_tags(block$object, param_names=setdiff(function_args,documented_args))
+  #
+  ## now add the class information to the description of all param tags 
+  #updated_param_tags <- lapply(
+  #  append(present_param_tags,extra_tags),
+  #  function(tag){
+  #    v<-tag$val
+  #    if (v$name %in% names(sig) && sig[[v$name]] !='ANY'){
+  #      d <- paste("object of class:", "\\code{",sig[[v$name]],"}",', ' ,v$description,sep='')
+  #      tag <- roxy_tag(
+  #        tag='param',
+  #        raw=paste(v$name,': ',d,sep=''),
+  #        val=list("name"=v$name,description=d)
+  #      )
+  #    }
+  #    tag
+  #  }
+  #)
+  #block$tags <- append(other_tags,updated_param_tags)
+  
+  rd <- RoxyTopic$new()
+  topic_add_name_aliases(rd, block, name)
+  for (tag in block$tags) {
+    rd$add(roxy_tag_rd(tag, env = env, base_path = base_path))
+  }
+
+  if (rd$has_section("description") && rd$has_section("reexport")) {
+    roxy_tag_warning(block$tags[[1]], "Can't use description when re-exporting")
+    return()
+  }
+  describe_rdname <- topic_add_describe_in(rd, block, env)
+
+  filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
+  rd$filename <- paste0(filename, ".Rd")
+  rd
+}
+
 #' @export
 
 block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
