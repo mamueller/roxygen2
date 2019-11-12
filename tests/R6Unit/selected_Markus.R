@@ -16,7 +16,8 @@ s<-TestSuite$new(list(
   #PkgScriptTests$new('test.Signature_remove_autotag')
   #PkgScriptTests$new('test.SignatureMinimal_update_auto_comment')
   #PkgScriptTests$new('test.S4Class_autotag')
-  PkgScriptTests$new('test.S4Class_autocomment')
+  #PkgScriptTests$new('test.S4Class_autocomment')
+  PkgScriptTests$new('test.SignatureMinimal_idempotence_update_auto_comment')
 ))
 print(s$test_names())
 #s$parallel <- 1 

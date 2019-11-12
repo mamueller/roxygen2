@@ -169,9 +169,9 @@ update_block_autocomments<-function(block,lines){
     pos<-as.numeric(lapply(param_tags,function(tag) tag$line))
     line_nr<-min(pos)
     new_lines<-c(
-      lines[1:line_nr],
+      lines[1:(line_nr-1)],
       param_lines,
-      lines[(line_nr+1):length(lines)]
+      lines[(line_nr):length(lines)]
     )
   }
  new_lines
@@ -253,7 +253,8 @@ update_file_autocomments<-function(file,results){
   # and work our way backwards to the first block
   # Thus only the positions of the already updated blocks in
   # the file change
-  for (block in bs){
+  for (i in seq_along(bs)){
+      block<-bs[[i]]
       lines<-update_block_autocomments(block,lines)
       # find the start lines of all the tags in the block (except the title tag)
       write_lines(lines,file)
@@ -267,7 +268,7 @@ param_tag_to_block_lines<-function(tag){
   d   <-value$description
   line<-comment_tag(
     tag='@param',
-    value=paste0(name,' : ',d)
+    value=paste(name,d)
   )
   line
 }

@@ -116,7 +116,7 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     
     ,
     #--------------------------------
-	  test.SignatureMinimal_idempotency_update_auto_comment=function(){
+	  test.SignatureMinimal_idempotence_update_auto_comment=function(){
       targetPkgName<-"SignaturesMinimalWithAutoComments"
       #requireNamespace("R6Unit")
       # copy the files 
@@ -130,8 +130,25 @@ PkgScriptTests<-R6Class("PkgScriptTests",
       }
       # now duplicate the package directory
       R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
-      roxygenize(pkgDirAutoDocs,c("update_autocomment_roclet"))
-      stop('make sure that the src file did not change')
+      roxygenize(pkgDirAutoDocs,c("update_auto_comment_roclet"))
+      file_names<-list.files(file.path(pkgDirOrg,'R'))
+      stopifnot(
+        all(
+          as.logical(
+            lapply(
+              file_names,
+              function(file_name){
+                all(
+                  readLines( file.path(pkgDirOrg,'R',file_name)) == 
+                  readLines( file.path(pkgDirAutoDocs,'R',file_name))
+                )
+              }
+            )
+          )
+        )
+      )
+      #browser()
+      
 	  }
     
     
