@@ -116,6 +116,28 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     
     ,
     #--------------------------------
+	  test.SignatureMinimal_idempotency_update_auto_comment=function(){
+      targetPkgName<-"SignaturesMinimalWithAutoComments"
+      #requireNamespace("R6Unit")
+      # copy the files 
+      resourceDirName<-file.path("..","..","test_resources","example_packages")
+      pkgDirOrg="pkgDirOrg"
+      pkgDirAutoDocs="pkgDirAutoDocs"
+      R6Unit::cpDir(file.path(resourceDirName,targetPkgName),pkgDirOrg)
+      # if necessarry add a default DESCRIPTION file
+      if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
+        writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
+      }
+      # now duplicate the package directory
+      R6Unit::cpDir(pkgDirOrg,pkgDirAutoDocs)
+      roxygenize(pkgDirAutoDocs,c("update_autocomment_roclet"))
+      stop('make sure that the src file did not change')
+	  }
+    
+    
+    
+    ,
+    #--------------------------------
 	  test.Signature_remove_autotag=function(){
       source('../../number_of_auto_lines.R')
       targetPkgName<-"SignaturesMinimalWithAutoTags"
