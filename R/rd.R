@@ -260,16 +260,7 @@ block_to_rd.roxy_block_s4method <- function(block, base_path, env) {
 
   describe_rdname <- topic_add_describe_in(rd, block, env)
 
-  hash_name=NULL
-  if (stringr::str_length(name)>16){
-    # If the filename for the *.Rd  file would get too long
-    # too long to be accepted by cran due to limitations 
-    # of the  'tar ' program 
-    # we compute a hash for the signature which is much shorter 
-    # also unique (at least with with very high probality)
-    hash_name<-paste0(genName,"-method_",digest::digest(as.character(sig)))
-  }
-  filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% hash_name %||% nice_name(name)
+  filename <- describe_rdname %||% block_get_tag(block, "rdname")$val %||% nice_name(name)
   rd$filename <- paste0(filename, ".Rd")
   rd
 }

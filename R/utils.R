@@ -58,6 +58,23 @@ nice_name <- function(x) {
   x <- str_replace_all(x, "-+", "-")
   x <- str_replace_all(x, "^-|-$", "")
   x <- str_replace_all(x, "^\\.", "dot-")
+  permitted_length<-72
+  if (stringr::str_length(x)>permitted_length){
+    # If the filename for the *.Rd  file would get too long
+    # to be accepted by cran due to limitations 
+    # of the  'tar ' program ( which happens for methods with
+    # long signatures )
+    # we compute a hash which is shorter but 
+    # also unique (at least with with very high probality)
+    # and then construct a new name that starts with 
+    # the first letters of the original name but 
+    # uses the hash for the rest.
+    # This way we keep as much of the descriptive part
+    # of the filename as possible (in most cases everything).
+    x<-paste0(
+      substring(x,1,(permitted_length-8)), #the first characters
+      digest::digest(as.character(x),algo='crc32')) # the last 8
+  }
   x
 }
 

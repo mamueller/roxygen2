@@ -56,21 +56,6 @@ PkgScriptTests<-R6Class("PkgScriptTests",
     
     ,
     ##--------------------------------
-	  test.S4Class=function(){
-      checkExamplePkg(
-        "S4Class",
-        roclets=c(
-          "collate", 
-          "namespace",
-          "rd"
-        )
-      )
-	  }
-    
-    
-    
-    ,
-    ##--------------------------------
 	  test.SignatureMinimal=function(){
       checkExamplePkg(
         "SignaturesMinimal",
