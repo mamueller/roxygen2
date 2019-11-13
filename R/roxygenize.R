@@ -29,7 +29,6 @@ roxygenize <- function(package.dir = ".",
                        roclets = NULL,
                        load_code = NULL,
                        clean = FALSE) {
-
   base_path <- normalizePath(package.dir)
   is_first <- roxygen_setup(base_path)
 
