@@ -16,6 +16,24 @@ InheritanceGraphTests<-R6Class("InheritanceGraphTests",
     
     ,
     #--------------------------------
+	  test.SuperClassTag=function(){
+      targetPkgName<-"S4ClassInheritanceWithMethods"
+      #requireNamespace("R6Unit")
+      # copy the files 
+      resourceDirName<-file.path("..","..","test_resources","example_packages")
+      pkgDirOrg="pkgDirOrg"
+      R6Unit::cpDir(file.path(resourceDirName,targetPkgName),pkgDirOrg)
+      # if necessarry add a default DESCRIPTION file
+      if (!file.exists(file.path(pkgDirOrg,"DESCRIPTION"))){ 
+        writeDescriptionFile(Imports="methods",pkgName=targetPkgName,pkgDir=pkgDirOrg)
+      }
+      roxygenize(pkgDirOrg,c("rd"))
+	  }
+
+
+
+    ,
+    #--------------------------------
 	  test.ClassGraph=function(){
       targetPkgName<-"S4ClassInheritance"
       #requireNamespace("R6Unit")

@@ -1,7 +1,7 @@
 require(R6Unit,quiet=TRUE)
 writeDescriptionFile<-function(Imports=NULL,Depends=NULL,pkgName="ExamplePackage",pkgDir="."){
-	desc <-paste("Package: ",pkgName," 
-Title: EXAMPLES to TEST the POSSIBILITIES of NAMESPACES  
+	desc <-paste("Package: ",pkgName,"\n",
+"Title: EXAMPLES to TEST the POSSIBILITIES of NAMESPACES  
 Version:0.1
 Date: ",Sys.Date(),"
 Author:  Markus Mueller <mamueller@bgc-jena.mpg.de>

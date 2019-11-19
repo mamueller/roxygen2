@@ -144,36 +144,9 @@ block_to_rd.roxy_block_s4class<- function(block, base_path, env) {
       )
     block$tags<-append(block$tags,list(tt))
   }
-  # create empty tags for undocumented params
-
-  #function_args<-names(formals(block$object$value))
-  #md <- block$object$value
-  #sig <- md@defined
-  #genName <- attr(md,'generic')[[1]]
-
-  #present_param_tags<-block_get_tags(block,'param')
-  #other_tags<-setdiff(block$tags,present_param_tags)
-  #documented_args<-unlist( lapply(present_param_tags,function(tag){tag$val$name}))
-  #
-  #extra_tags <- extra_param_tags(block$object, param_names=setdiff(function_args,documented_args))
-  #
-  ## now add the class information to the description of all param tags 
-  #updated_param_tags <- lapply(
-  #  append(present_param_tags,extra_tags),
-  #  function(tag){
-  #    v<-tag$val
-  #    if (v$name %in% names(sig) && sig[[v$name]] !='ANY'){
-  #      d <- paste("object of class:", "\\code{",sig[[v$name]],"}",', ' ,v$description,sep='')
-  #      tag <- roxy_tag(
-  #        tag='param',
-  #        raw=paste(v$name,': ',d,sep=''),
-  #        val=list("name"=v$name,description=d)
-  #      )
-  #    }
-  #    tag
-  #  }
-  #)
-  #block$tags <- append(other_tags,updated_param_tags)
+  if (block_has_tags(block, "s4methods")||block_has_tags(block, "auto")){
+    block<-add_method_tags_with_class_in_signature(block,env)
+  }
   
   rd <- RoxyTopic$new()
   topic_add_name_aliases(rd, block, name)
@@ -269,8 +242,69 @@ methodDocName=function (value){
     paste0(value@generic, ",", paste0(value@defined, collapse = ","), "-method")
 }
 
-add_method_tags=function (block){
-    meths<-methods::findMethods(block$object$value)
+add_method_tags_with_class_in_signature=function (block,env){
+    s4cd<-block$object$value
+    className<-as.character(attr(s4cd,'className'))
+    #pkgName<-attr(attr(s4cd,'className'),'package')
+    #pkg_generics_names<-getGenerics(paste0('package:',pkgName))
+    pkg_generics_names<-getGenerics(where=env)
+    meths=unlist(lapply(
+      pkg_generics_names,
+      function(genName){
+        gen<-methods::getGeneric(genName,where=env)
+        methods::findMethods(gen,classes=c(className))
+      }
+    ))
+    aliases<-lapply(
+      meths,
+      function(m){
+        methodDocName(m)
+      }
+    )
+    # create a nested list
+    present_class_section<- list(class=className,methods=aliases)
+
+    super_class_names<-names(attr(s4cd,'contains'))
+    super_class_sections<-lapply(
+        super_class_names,
+        function(className){
+          meths<-unlist(
+            lapply(
+              pkg_generics_names,
+              function(genName){
+                gen<-methods::getGeneric(genName,where=env)
+                methods::findMethods(gen,classes=c(className))
+              }
+            )
+          )
+          aliases<-lapply(
+            meths,
+            function(m){
+              methodDocName(m)
+            }
+          )
+          list(class=className,methods=aliases)
+        }
+    )
+    tt<- roxy_tag(
+        tag='s4methods',
+        raw="",
+        val= list(
+          class         =present_class_section,
+          super_classes =super_class_sections
+        )
+    )
+    block$tags<-append(block$tags,list(tt))
+    block
+}
+s4_method_tag_entry_for_class<-function(className,env){
+}
+
+
+add_method_tags=function (block,env){
+    generic<-block$object$value
+    genName<-as.character(attr(generic,'generic'))
+    meths<-methods::findMethods(block$object$value,where=env)
     aliases<-lapply(
       meths,
       function(m){
@@ -280,8 +314,7 @@ add_method_tags=function (block){
     tt<- roxy_tag(
         tag='s4methods',
         raw="",
-        val= aliases
-        #val= c("method 17","method 2") 
+        val= list(generic=genName,methods=aliases)
       )
     block$tags<-append(block$tags,list(tt))
     block
@@ -310,10 +343,9 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
         val=str
       )
     block$tags<-append(block$tags,list(tt))
-    block<-add_method_tags(block)
   }  
-  if (block_has_tags(block, "s4methods")){
-    block<-add_method_tags(block)
+  if (block_has_tags(block, "s4methods")||block_has_tags(block, "auto")){
+    block<-add_method_tags(block,env)
   }
 
   rd <- RoxyTopic$new()
