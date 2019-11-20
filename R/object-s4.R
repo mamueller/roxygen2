@@ -8,7 +8,6 @@ roxy_tag_parse.roxy_tag_s4methods<- function(x) {
 #' @export
 roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
   l<-x$val
-  browser()
   if(l$type=="class"){
     # we are in the documentation of a S4class
     res<-rd_section("s4methodsOfClass",value=x$val)

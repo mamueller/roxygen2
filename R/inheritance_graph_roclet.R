@@ -64,7 +64,6 @@ roclet_output.roclet_inheritance_graph<- function(x, results,  base_path,...) {
   g2 <- igraph::graph_from_data_frame( d=links,vertices=nodes,directed=TRUE) 
   l<-layout_with_sugiyama(g2,hgap=.01)$layout
   #swap columns
-  browser()
   m<-l
   old_y=l[,2]
   old_x=l[,1]
@@ -76,7 +75,7 @@ roclet_output.roclet_inheritance_graph<- function(x, results,  base_path,...) {
     dir_path<-file.path(base_path,'inst','doc')
     if(!file.exists(dir_path)){
       dir.create(path=dir_path,recursive=TRUE)
-      sleep(1)
+      Sys.sleep(1)
     }
     p<-file.path(dir_path,'InheretanceGraph.pdf')
     vlfs=.2

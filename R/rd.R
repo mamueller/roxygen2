@@ -374,7 +374,6 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
       list(gen_methods_tag(block$object$value,env))
     )
   }
-  #browser()
 
   rd <- RoxyTopic$new()
   topic_add_name_aliases(rd, block, name)
