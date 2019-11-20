@@ -1,3 +1,18 @@
+# define generics
+setGeneric(
+    name='getName',
+    def=function(obj){
+      standardGeneric('getName')
+    }
+)
+setGeneric(
+    name='getSallary',
+    def=function(obj){
+      standardGeneric('getSallary')
+    }
+)
+
+# define classes
 #' @auto
 setClass(
    Class="Person",
@@ -25,12 +40,7 @@ setClass(
    slots=c(discounts="character")
 )
 
-setGeneric(
-    name='getName',
-    def=function(obj){
-      standardGeneric('getName')
-    }
-)
+#define methods
 setMethod(
     f='getName',
     signature=signature(obj="Person"),
@@ -38,12 +48,7 @@ setMethod(
       obj@name
     }
 )
-setGeneric(
-    name='getSallary',
-    def=function(obj){
-      standardGeneric('getSallary')
-    }
-)
+
 setMethod(
     f='getSallary',
     signature=signature(obj="Employe"),

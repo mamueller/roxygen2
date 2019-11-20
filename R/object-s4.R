@@ -7,44 +7,108 @@ roxy_tag_parse.roxy_tag_s4methods<- function(x) {
 
 #' @export
 roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
-  rd_section("s4methods",value=x$val)
+  l<-x$val
+  browser()
+  if(l$type=="class"){
+    # we are in the documentation of a S4class
+    res<-rd_section("s4methodsOfClass",value=x$val)
+  }
+  if(l$type=="generic"){
+    res<-rd_section("s4methodsOfGeneric",value=x$val)
+  }
+  res
+}
+
+#helper
+method_link_lines<-function(method_names,section_title){
+  c(
+    "      \\itemize{",
+    unlist(
+      lapply(
+        method_names,
+        function(name){
+          paste0("        \\item \\code{\\link{",name,"}}",collapse="")
+        }
+      )
+    ),
+    "      }"
+  )
 }
 
 #' @export
-format.rd_section_s4methods<- function(x, ...) {
-  #define a helper funciton
-  subsection<-function(sublist,section_title){
-      class<-sublist$class
-      methods<-sublist$methods
-      res <- paste0(
-        "  \\itemize{\n",
-        paste0("    \\item ", "\\code{\\link{",method_names,"}}","\n", collapse = ""),
-        "  }\n"
-      )
-      paste0(
-          "\\section{",section_title,"}{\n",
-          res,
-          "}\n"
-      )
-  }
+format.rd_section_s4methodsOfClass<- function(x, ...) {
+  # we are documenting a S4class
   l<-x$value
-  section_names<-names(l)
-  browser()
-  if(any(c("class","super_classes") %in% section_names)){
-    # we are in the documentation of a S4class
-    lines<-subsection(l$class,paste("S4-methods directly using",l$class$class))
-    super_class_lines<-unlist(
-      lapply(
-        l$super_classes,
-        function(sublist){
-          subsection(sublist,paste("S4-methods using the superclass",sublist$class))
-        }
+  source_class_sub_list <-l[['direct_record']]
+  super_class_sub_list  <-l[['super_class_record_list']]
+  lines=character(0)
+  if (length(source_class_sub_list$methods)>0){
+    title<-paste0(
+      "S4-methods with class \\code{",
+      source_class_sub_list$class,
+      "} in their signature:"
+    )
+    lines<- append(
+      lines,
+      c(
+        paste0("  \\subsection{",title,"}{",collapse=""),
+        method_link_lines(source_class_sub_list$methods),
+        "  }"
       )
     )
-    lines<-c(lines,super_class_lines)
   }
-  if(any("generic" %in% section_names)){
-    lines<-subsection(l$class,paste("S4-methods for generic",l$generic))
+  if (length(super_class_sub_list)>0){
+    super_class_lines<- unlist(
+      purrr::keep(
+        lapply(
+          super_class_sub_list,
+          function(sublist){
+            if (length(sublist$methods)<1){
+              return(NULL)
+            }
+            title<-paste( "superclass", sublist$class,collapse=" ")
+            c(
+              paste0( "    \\subsubsection{",title,"}{"),
+              method_link_lines(sublist$methods),
+              "    }"
+            )
+          }
+        ),
+        .p=function(lines) !is.null(lines)
+      )
+    )
+    title<-paste0(
+      "S4-methods with superclasses of class ",
+      "\\code{",source_class_sub_list$class,"} ",
+      "in their signature:"
+    )
+    lines<- append(
+      lines,
+      c(
+        paste0("  \\subsection{",title,"}{"),
+          super_class_lines,
+        "  }"
+      )
+    )
   }
+  if(length(lines)>0){
+    lines<- c(
+      "\\section{S4-methods}{",
+      lines,
+      "}"
+    )
+  }
+  lines
+}
+
+
+#' @export
+format.rd_section_s4methodsOfGeneric<- function(x, ...) {
+  l<-x$value
+  lines<-c(
+    "\\section{S4-methods}{",
+      method_link_lines(l$methods),
+    "}"
+  )
   lines
 }

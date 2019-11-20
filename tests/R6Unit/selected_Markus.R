@@ -6,7 +6,7 @@ require("pkgload")
 #pkgload::load_all('~/debugHelpers/pkg',export_all=FALSE)
 #pkgload::load_all('~/R6Unit/pkg',export_all=FALSE)
 #source("ClassDocScriptTest.R")
-#source("PkgScriptTests.R")
+source("PkgScriptTests.R")
 source("InheritanceGraphTest.R")
 
 s<-TestSuite$new(list(
