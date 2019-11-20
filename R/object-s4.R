@@ -8,14 +8,17 @@ roxy_tag_parse.roxy_tag_s4methods<- function(x) {
 #' @export
 roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
   l<-x$val
+  if(!('type' %in% names(l))){
+    roxy_tag_warning(x,'was used in the documentation of an object that does not support it. It can be used in the documentation of s4classes or generic functions')
+    return(character(0))
+  }
   if(l$type=="class"){
     # we are in the documentation of a S4class
-    res<-rd_section("s4methodsOfClass",value=x$val)
+    return(rd_section("s4methodsOfClass",value=x$val))
   }
   if(l$type=="generic"){
-    res<-rd_section("s4methodsOfGeneric",value=x$val)
+    return(rd_section("s4methodsOfGeneric",value=x$val))
   }
-  res
 }
 
 #helper
@@ -67,7 +70,7 @@ format.rd_section_s4methodsOfClass<- function(x, ...) {
             }
             title<-paste( "superclass", sublist$class,collapse=" ")
             c(
-              paste0( "    \\subsubsection{",title,"}{"),
+              paste0( "    \\subsection{",title,"}{"),
               method_link_lines(sublist$methods),
               "    }"
             )
