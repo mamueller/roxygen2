@@ -131,25 +131,37 @@ block_to_rd.roxy_block_s4class<- function(block, base_path, env) {
     str<-block$object$topic
     # create title tag
     tt<- roxy_tag(
-        tag='title',
-        raw=str,
-        val=str
-      )
+      tag='title',
+      raw=str,
+      val=str
+    )
     
     # create documentation tag
     d<-'no manual documentation'
     dt<- roxy_tag(
-        tag='description',
-        raw=d,
-        val=d
-      )
+      tag='description',
+      raw=d,
+      val=d
+    )
     # create an empty s4method tag
     s4mt<- roxy_tag(
-        tag='s4methods',
-        raw="",
-        val="" 
-      )
-    block$tags<-append(block$tags,list(tt,dt,s4mt))
+      tag='s4methods',
+      raw="",
+      val=NULL 
+    )
+    # create an empty s4subclasses tag
+    s4subct<- roxy_tag(
+      tag='s4subclasses',
+      raw="",
+      val=NULL 
+    )
+    # create an empty s4subclasses tag
+    s4supct<- roxy_tag(
+      tag='s4superclasses',
+      raw="",
+      val=NULL 
+    )
+    block$tags<-append(block$tags,list(tt,dt,s4mt,s4subct,s4supct))
   }
   if (block_has_tags(block, "s4methods")){
     # replace the empty tag by one that has the
@@ -160,6 +172,44 @@ block_to_rd.roxy_block_s4class<- function(block, base_path, env) {
         function(tag){tag$tag=="s4methods"}
       ),
       list(class_methods_tag(block$object$value,env))
+    )
+  }
+  if (block_has_tags(block, "s4subclasses")){
+    # replace the empty tag by one that has the
+    # subclasses as value
+    browser()
+    block$tags<-append(
+      purrr::discard(
+        block$tags,
+        function(tag){tag$tag=="s4subclasses"}
+      ),
+      list(
+        roxy_tag(
+          tag='s4subclasses',
+          raw="",
+          val=names(attr(block$object$value,'subclasses'))
+        )
+      )
+    )
+  }
+  if (block_has_tags(block, "s4superclasses")){
+    # replace the empty tag by one that has the
+    # subclasses as value
+    block$tags<-append(
+      
+      purrr::discard(
+        block$tags,
+        function(tag){tag$tag=="s4superclasses"}
+      ),
+
+      list(
+        roxy_tag(
+          tag='s4superclasses',
+          raw="",
+          val=names(attr(block$object$value,'contains'))
+        )
+      )
+      
     )
   }
   
@@ -329,7 +379,6 @@ gen_methods_tag=function (generic,env){
     val= list(type='generic',genName=genName,methods=aliases)
   )
 }
-
 
 
 #' @export

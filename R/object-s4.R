@@ -22,7 +22,7 @@ roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
 }
 
 #helper
-method_link_lines<-function(method_names,section_title){
+method_link_lines<-function(method_names){
   c(
     "      \\itemize{",
     unlist(
@@ -30,6 +30,21 @@ method_link_lines<-function(method_names,section_title){
         method_names,
         function(name){
           paste0("        \\item \\code{\\link{",name,"}}",collapse="")
+        }
+      )
+    ),
+    "      }"
+  )
+}
+#helper
+class_link_lines<-function(names){
+  c(
+    "      \\itemize{",
+    unlist(
+      lapply(
+        names,
+        function(name){
+          paste0("        \\item \\code{\\linkS4class{",name,"}}",collapse="")
         }
       )
     ),
@@ -114,3 +129,58 @@ format.rd_section_s4methodsOfGeneric<- function(x, ...) {
   )
   lines
 }
+
+
+#' Show known subclasses of a given S4 class
+#' @export
+roxy_tag_parse.roxy_tag_s4subclasses<- function(x) {
+  #tag_words_line(x)
+  x$val<-NULL
+  x
+}
+
+#' Show known subclasses of a given S4 class
+#'
+#' @export
+roxy_tag_rd.roxy_tag_s4subclasses<- function(x, base_path, env) {
+  l<-x$val
+  rd_section("s4subclasses",value=x$val)
+}
+
+#' @export
+format.rd_section_s4subclasses<- function(x, ...) {
+  l<-x$val 
+  lines<-c(
+    "\\section{S4-subclasses}{",
+      method_link_lines(l),
+    "}"
+  )
+  lines
+}
+
+#' Show known superclasses of a given S4 class
+#'
+#' @export
+roxy_tag_parse.roxy_tag_s4superclasses<- function(x) {
+  #tag_words_line(x)
+  x$val<-NULL
+  x
+}
+
+#' @export
+roxy_tag_rd.roxy_tag_s4superclasses<- function(x, base_path, env) {
+  l<-x$val
+  rd_section("s4superclasses",value=x$val)
+}
+
+#' @export
+format.rd_section_s4superclasses<- function(x, ...) {
+  l<-x$val 
+  lines<-c(
+    "\\section{S4-superclasses}{",
+      method_link_lines(l),
+    "}"
+  )
+  lines
+}
+
