@@ -8,10 +8,6 @@ roxy_tag_parse.roxy_tag_s4methods<- function(x) {
 #' @export
 roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
   l<-x$val
-  if(!('type' %in% names(l))){
-    roxy_tag_warning(x,'was used in the documentation of an object that does not support it. It can be used in the documentation of s4classes or generic functions')
-    return(character(0))
-  }
   if(l$type=="class"){
     # we are in the documentation of a S4class
     return(rd_section("s4methodsOfClass",value=x$val))
@@ -22,14 +18,14 @@ roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
 }
 
 #helper
-method_link_lines<-function(method_names){
+link_lines<-function(method_names,rd_link_string='link'){
   c(
     "      \\itemize{",
     unlist(
       lapply(
         method_names,
         function(name){
-          paste0("        \\item \\code{\\link{",name,"}}",collapse="")
+          paste0("        \\item \\code{\\",rd_link_string,"{",name,"}}",collapse="")
         }
       )
     ),
@@ -37,19 +33,10 @@ method_link_lines<-function(method_names){
   )
 }
 #helper
+method_link_lines<-link_lines
+#helper
 class_link_lines<-function(names){
-  c(
-    "      \\itemize{",
-    unlist(
-      lapply(
-        names,
-        function(name){
-          paste0("        \\item \\code{\\linkS4class{",name,"}}",collapse="")
-        }
-      )
-    ),
-    "      }"
-  )
+  link_lines(names,rd_link_string='linkS4class')
 }
 
 #' @export
@@ -95,7 +82,7 @@ format.rd_section_s4methodsOfClass<- function(x, ...) {
       )
     )
     title<-paste0(
-      "S4-methods with superclasses of class ",
+      "S4-methods with superclasses (in the package) of class ",
       "\\code{",source_class_sub_list$class,"} ",
       "in their signature:"
     )
@@ -150,15 +137,19 @@ roxy_tag_rd.roxy_tag_s4subclasses<- function(x, base_path, env) {
 #' @export
 format.rd_section_s4subclasses<- function(x, ...) {
   l<-x$val 
-  lines<-c(
-    "\\section{S4-subclasses}{",
-      method_link_lines(l),
-    "}"
-  )
+  if(length(l)>1){
+    lines<-c(
+      "\\section{S4-subclasses}{",
+        class_link_lines(l),
+      "}"
+    )
+  }else{
+    lines=character(0)
+  }
   lines
 }
 
-#' Show known superclasses of a given S4 class
+#' Show known superclasses (in the package) of a given S4 class
 #'
 #' @export
 roxy_tag_parse.roxy_tag_s4superclasses<- function(x) {
@@ -176,11 +167,15 @@ roxy_tag_rd.roxy_tag_s4superclasses<- function(x, base_path, env) {
 #' @export
 format.rd_section_s4superclasses<- function(x, ...) {
   l<-x$val 
-  lines<-c(
-    "\\section{S4-superclasses}{",
-      method_link_lines(l),
-    "}"
-  )
+  if (length(l)>1){
+    lines<-c(
+      "\\section{S4-superclasses (in the package)}{",
+        class_link_lines(l),
+      "}"
+    )
+  }else{
+    lines=character(0)
+  }
   lines
 }
 

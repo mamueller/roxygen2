@@ -166,18 +166,75 @@ block_to_rd.roxy_block_s4class<- function(block, base_path, env) {
   if (block_has_tags(block, "s4methods")){
     # replace the empty tag by one that has the
     # methods as value
+    s4cd<-block$object$value
+    className<-as.character(attr(s4cd,'className'))
+    #pkgName<-attr(attr(s4cd,'className'),'package')
+    #pkg_generics_names<-getGenerics(paste0('package:',pkgName))
+    pkg_generics_names<-getGenerics(where=env)
+    meths=unlist(lapply(
+      pkg_generics_names,
+      function(genName){
+        gen<-methods::getGeneric(genName,where=env)
+        methods::findMethods(gen,classes=c(className))
+      }
+    ))
+    aliases<-lapply(
+      meths,
+      function(m){
+        methodDocName(m)
+      }
+    )
+    # create a nested list
+    present_class_section<- list(class=className,methods=aliases)
+
+    super_classes<- attr(block$object$value,'contains')
+    pkg_super_classes<-purrr::keep(
+      super_classes,
+      function(ce){ce@package==env$.packageName}
+    )
+    super_class_names<-names(pkg_super_classes)
+    super_class_sections<-lapply(
+        super_class_names,
+        function(className){
+          meths<-unlist(
+            lapply(
+              pkg_generics_names,
+              function(genName){
+                gen<-methods::getGeneric(genName,where=env)
+                methods::findMethods(gen,classes=c(className))
+              }
+            )
+          )
+          aliases<-lapply(
+            meths,
+            function(m){
+              methodDocName(m)
+            }
+          )
+          list(class=className,methods=aliases)
+        }
+    )
+    new_tag<-roxy_tag(
+        tag='s4methods',
+        raw="",
+        val= list(
+          type                              ='class',
+          direct_record                     =present_class_section,
+          super_class_record_list           =super_class_sections
+        )
+    )
+    #new_tag<-class_methods_tag(block$object$value,env)
     block$tags<-append(
       purrr::discard(
         block$tags,
         function(tag){tag$tag=="s4methods"}
       ),
-      list(class_methods_tag(block$object$value,env))
+      list(new_tag)
     )
   }
   if (block_has_tags(block, "s4subclasses")){
     # replace the empty tag by one that has the
     # subclasses as value
-    browser()
     block$tags<-append(
       purrr::discard(
         block$tags,
@@ -193,6 +250,11 @@ block_to_rd.roxy_block_s4class<- function(block, base_path, env) {
     )
   }
   if (block_has_tags(block, "s4superclasses")){
+    super_classes<- attr(block$object$value,'contains')
+    pkg_super_classes<-purrr::keep(
+      super_classes,
+      function(ce){ce@package==env$.packageName}
+    )
     # replace the empty tag by one that has the
     # subclasses as value
     block$tags<-append(
@@ -206,7 +268,7 @@ block_to_rd.roxy_block_s4class<- function(block, base_path, env) {
         roxy_tag(
           tag='s4superclasses',
           raw="",
-          val=names(attr(block$object$value,'contains'))
+          val=names(pkg_super_classes)
         )
       )
       
@@ -309,77 +371,6 @@ methodDocName=function (value){
 
 
 
-class_methods_tag=function (s4cd,env){
-    className<-as.character(attr(s4cd,'className'))
-    #pkgName<-attr(attr(s4cd,'className'),'package')
-    #pkg_generics_names<-getGenerics(paste0('package:',pkgName))
-    pkg_generics_names<-getGenerics(where=env)
-    meths=unlist(lapply(
-      pkg_generics_names,
-      function(genName){
-        gen<-methods::getGeneric(genName,where=env)
-        methods::findMethods(gen,classes=c(className))
-      }
-    ))
-    aliases<-lapply(
-      meths,
-      function(m){
-        methodDocName(m)
-      }
-    )
-    # create a nested list
-    present_class_section<- list(class=className,methods=aliases)
-
-    super_class_names<-names(attr(s4cd,'contains'))
-    super_class_sections<-lapply(
-        super_class_names,
-        function(className){
-          meths<-unlist(
-            lapply(
-              pkg_generics_names,
-              function(genName){
-                gen<-methods::getGeneric(genName,where=env)
-                methods::findMethods(gen,classes=c(className))
-              }
-            )
-          )
-          aliases<-lapply(
-            meths,
-            function(m){
-              methodDocName(m)
-            }
-          )
-          list(class=className,methods=aliases)
-        }
-    )
-    roxy_tag(
-        tag='s4methods',
-        raw="",
-        val= list(
-          type                              ='class',
-          direct_record                     =present_class_section,
-          super_class_record_list           =super_class_sections
-        )
-    )
-}
-
-
-gen_methods_tag=function (generic,env){
-  genName<-as.character(attr(generic,'generic'))
-  meths<-methods::findMethods(generic,where=env)
-  aliases<-lapply(
-    meths,
-    function(m){
-      methodDocName(m)
-    }
-  )
-  roxy_tag(
-    tag='s4methods',
-    raw="",
-    val= list(type='generic',genName=genName,methods=aliases)
-  )
-}
-
 
 #' @export
 #'
@@ -415,14 +406,28 @@ block_to_rd.roxy_block_s4generic<- function(block, base_path, env) {
   if (block_has_tags(block, "s4methods")){
     # replace the empty tag by one that has the
     # methods as value
-    block$tags<-append(
-      purrr::discard(
-        block$tags,
-        function(tag){tag$tag=="s4methods"}
-      ),
-      list(gen_methods_tag(block$object$value,env))
+    generic<-block$object$value
+    genName<-as.character(attr(generic,'generic'))
+    meths<-methods::findMethods(generic,where=env)
+    aliases<-lapply(
+      meths,
+      function(m){
+        methodDocName(m)
+      }
     )
-  }
+    new_tag<-roxy_tag(
+      tag='s4methods',
+      raw="",
+      val= list(type='generic',genName=genName,methods=aliases)
+    )
+      block$tags<-append(
+        purrr::discard(
+          block$tags,
+          function(tag){tag$tag=="s4methods"}
+        ),
+        list(new_tag)
+      )
+    }
 
   rd <- RoxyTopic$new()
   topic_add_name_aliases(rd, block, name)
