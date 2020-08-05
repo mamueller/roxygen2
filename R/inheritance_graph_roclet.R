@@ -34,7 +34,7 @@ roclet_process.roclet_inheritance_graph<- function(x, blocks, env, base_path) {
     rbind,
     lapply(
       cl_names,
-      function(cl_name) data.frame(id=cl_name)
+      function(cl_name) data.frame(id=as.character(cl_name))
     )
   )
 
@@ -61,6 +61,8 @@ roclet_process.roclet_inheritance_graph<- function(x, blocks, env, base_path) {
 roclet_output.roclet_inheritance_graph<- function(x, results,  base_path,...) {
   links<-results$links
   nodes<-results$nodes
+  # add the nod
+  nodes=data.frame(id=union(nodes[,'id'],union(links[,"from"],links[,"to"])))
   g2 <- igraph::graph_from_data_frame( d=links,vertices=nodes,directed=TRUE) 
   l<-layout_with_sugiyama(g2,hgap=.01)$layout
   #swap columns
@@ -77,7 +79,8 @@ roclet_output.roclet_inheritance_graph<- function(x, results,  base_path,...) {
       dir.create(path=dir_path,recursive=TRUE)
       Sys.sleep(1)
     }
-    p<-file.path(dir_path,'InheretanceGraph.pdf')
+    #p<-file.path(dir_path,'InheritanceGraph.pdf')
+    p<-file.path('InheritanceGraph.pdf')
     vlfs=.2
     pdf(p)
       plot(
