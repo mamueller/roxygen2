@@ -8,16 +8,21 @@ roxy_tag_parse.roxy_tag_s4methods<- function(x) {
 #' @export
 roxy_tag_rd.roxy_tag_s4methods<- function(x, base_path, env) {
   l<-x$val
+  
   if(l$type=="class"){
     # we are in the documentation of a S4class
-    return(rd_section("s4methodsOfClass",value=x$val))
+    # further down we will need the environment to 
+    # find superclasses in the package
+    l<-append(l,list(package_classes=env$s4_class_names))
+    return(rd_section("s4methodsOfClass",value=l))
   }
   if(l$type=="generic"){
-    return(rd_section("s4methodsOfGeneric",value=x$val))
+    return(rd_section("s4methodsOfGeneric",value=l))
   }
 }
 
 #helper
+
 link_lines<-function(method_names,rd_link_string='link'){
   c(
     "      \\itemize{",
@@ -45,6 +50,29 @@ format.rd_section_s4methodsOfClass<- function(x, ...) {
   l<-x$value
   source_class_sub_list <-l[['direct_record']]
   super_class_sub_list  <-l[['super_class_record_list']]
+  package_classes  <-l[['package_classes']]
+  super_class_lines<- unlist(
+    purrr::keep(
+      lapply(
+        super_class_sub_list,
+        function(sublist){
+          if (!(sublist$class %in% package_classes)){
+            return(NULL)
+          }
+          if (length(sublist$methods)<1){
+            return(NULL)
+          }
+          title<-paste( "superclass", sublist$class,collapse=" ")
+          c(
+            paste0( "    \\subsection{",title,"}{"),
+            method_link_lines(sublist$methods),
+            "    }"
+          )
+        }
+      ),
+      .p=function(lines) !is.null(lines)
+    )
+  )
   lines=character(0)
   if (length(source_class_sub_list$methods)>0){
     title<-paste0(
@@ -61,26 +89,7 @@ format.rd_section_s4methodsOfClass<- function(x, ...) {
       )
     )
   }
-  if (length(super_class_sub_list)>0){
-    super_class_lines<- unlist(
-      purrr::keep(
-        lapply(
-          super_class_sub_list,
-          function(sublist){
-            if (length(sublist$methods)<1){
-              return(NULL)
-            }
-            title<-paste( "superclass", sublist$class,collapse=" ")
-            c(
-              paste0( "    \\subsection{",title,"}{"),
-              method_link_lines(sublist$methods),
-              "    }"
-            )
-          }
-        ),
-        .p=function(lines) !is.null(lines)
-      )
-    )
+  if (length(super_class_lines)>0){
     title<-paste0(
       "S4-methods with superclasses (in the package) of class ",
       "\\code{",source_class_sub_list$class,"} ",
@@ -161,7 +170,9 @@ roxy_tag_parse.roxy_tag_s4superclasses<- function(x) {
 #' @export
 roxy_tag_rd.roxy_tag_s4superclasses<- function(x, base_path, env) {
   l<-x$val
-  rd_section("s4superclasses",value=x$val)
+  package_classes= env$s4_class_names
+  inter <- intersect(l,package_classes)
+  rd_section("s4superclasses",value=inter)
 }
 
 #' @export

@@ -70,6 +70,19 @@ roxygenize <- function(package.dir = ".",
   env <- load_code(base_path)
 
   blocks <- lapply(blocks, block_set_env, env = env)
+  print('#############################################mm1')
+  s4_class_names = sapply(
+    purrr::keep(
+      blocks,
+      .p=function(block){
+          attr(block,"class")[1] == 'roxy_block_s4class'
+      }
+    ),
+    function(block){
+      attr(block$object$value,'className')[1]
+    }
+  )
+  env$s4_class_names=s4_class_names
 
   # Special case autotag: 
   # The _roclet changes the source code by
@@ -182,6 +195,7 @@ roxygenize <- function(package.dir = ".",
     roclet_output(x, results=blocks_with_auto_comment_tag, base_path)
     # parse again
     blocks <- parse_package(base_path, env = NULL)
+
     blocks <- lapply(blocks, block_set_env, env = env)
   }
 

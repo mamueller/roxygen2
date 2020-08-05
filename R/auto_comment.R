@@ -127,7 +127,7 @@ roclet_process.roclet_auto_comment<- function(x, blocks, env, base_path) {
               # as possible though and integrate it in case the pull request 
               # is accepted
               b<-roxy_block(tags=list(),file=file,line=5000L,call=call,object=NULL)
-              
+
               # some calls like globalVariables(c(something))
               # are not recognized. So we have to make sure
               # that we do not try to attach a "srcref" 
